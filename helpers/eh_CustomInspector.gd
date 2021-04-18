@@ -32,7 +32,7 @@ var _category_name: String = ""
 
 ### Built in Engine Methods -----------------------------------------------------------------------
 
-func _init(p_inspector: Node, p_origin: Node, properties: Array, category: String) -> void:
+func _init(p_inspector: Node, p_origin: Node, properties: Array, category: String = "") -> void:
 	node_inspector_control = p_inspector
 	node_origin = p_origin
 	_category_name = category
@@ -80,9 +80,9 @@ func has_property(p_property: String) -> bool:
 
 
 func set_source_properties() -> void:
-	for original_property in custom_properties:
-		for property in custom_properties[original_property]:
-			_set(property, get_meta(original_property))
+	for meta_property in custom_properties:
+		var original_property = custom_properties[meta_property]
+		_set(meta_property, node_inspector_control.get_meta(original_property))
 
 ### -----------------------------------------------------------------------------------------------
 
@@ -111,7 +111,9 @@ func _get_property_dict(property_name: String) -> Dictionary:
 
 func _get_properties_for(names: PoolStringArray) ->  Array:
 	var properties: = []
-	properties.append(_get_property_category())
+	if _category_name != "":
+		properties.append(_get_property_category())
+	
 	for name in names:
 		properties.append(_get_property_dict(name))
 	return properties

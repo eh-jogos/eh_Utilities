@@ -41,9 +41,9 @@ var _inspector_helpers: Dictionary = {}
 func _ready() -> void:
 	update_properties_to_expose()
 	
-	for key in _properties_to_expose:
-		for property in _properties_to_expose[key]:
-			_set("_%s"%[property], get_meta(property))
+	for value in _inspector_helpers.values():
+		var helper: eh_CustomInspector = value as eh_CustomInspector
+		helper.set_source_properties()
 	
 	if not Engine.editor_hint:
 		queue_free()

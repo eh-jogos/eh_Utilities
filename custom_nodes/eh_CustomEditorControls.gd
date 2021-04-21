@@ -132,6 +132,7 @@ func _get_inspector_helper_from_property(property: String) -> eh_CustomInspector
 func _update_properties_for(export_token: String, category_name: String) -> void:
 	_properties_to_expose[export_token] = []
 	var script: GDScript = get_parent().get_script()
+	
 	var export_comment_begin = script.source_code.find(export_token)
 	while export_comment_begin != -1:
 		var export_comment_end = script.source_code.find("\n", export_comment_begin) 
@@ -158,12 +159,17 @@ func _update_properties_for(export_token: String, category_name: String) -> void
 		
 		export_comment_begin = script.source_code.find(export_token, export_comment_end)
 	
+	if _properties_to_expose[export_token].empty():
+		if has_meta(export_token):
+			_properties_to_expose[export_token] = get_meta(export_token)
+	
 	_inspector_helpers[export_token] = eh_CustomInspector.new(
 			self, 
 			get_parent(), 
 			_properties_to_expose[export_token], 
 			category_name
 	)
+	set_meta(export_token, _inspector_helpers[export_token].custom_properties.values())
 
 
 func _get_property_name(property_line: String, export_token: String) -> String:

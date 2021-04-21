@@ -51,8 +51,10 @@ func update_debug_display() -> void:
 			continue
 		
 		var label = Label.new()
-		var variable_name = shared_variable.resource_path.get_basename()\
-				.lstrip(shared_variable.resource_path.get_base_dir())
+		var base_name = shared_variable.resource_path.get_basename()
+		var base_dir = shared_variable.resource_path.get_base_dir()
+		var variable_name = base_name.substr(base_dir.length()+1)
+		label.name = variable_name
 		label.text = "%s: %s"%[variable_name, shared_variable.value]
 		_list.add_child(label)
 

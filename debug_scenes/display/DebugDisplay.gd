@@ -56,7 +56,7 @@ func update_debug_display() -> void:
 		var variable_name = base_name.substr(base_dir.length()+1)
 		label.name = variable_name
 		label.text = "%s: %s"%[variable_name, shared_variable.value]
-		_list.add_child(label)
+		_list.add_child(label, true)
 
 ### -----------------------------------------------------------------------------------------------
 

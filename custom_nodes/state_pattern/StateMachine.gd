@@ -1,6 +1,5 @@
-# Based on GDQuest StateMachine but with some modifications to use a StringVariable for state name
-# so it actually needs the eh_SharedVariables plugin to work.
-tool
+# Based on GDQuest StateMachine but with some modifications in case it's extended to a tool script.
+# Which I sometimes do to add some debugging shared variables
 class_name StateMachine
 extends Node
 
@@ -25,8 +24,7 @@ var state: State = null
 
 #--- private variables - order: export > normal var > onready -------------------------------------
 
-#sv-export
-var _state_name: = StringVariable.new()
+var _state_name: String = ""
 
 ### -----------------------------------------------------------------------------------------------
 
@@ -36,12 +34,13 @@ var _state_name: = StringVariable.new()
 func _ready() -> void:
 	if eh_EditorHelpers.is_editor():
 		eh_EditorHelpers.disable_all_processing(self)
-	else:
-		yield(owner, "ready")
-		_set_state(get_node(initial_state))
-		state.enter()
-		_state_name.value = state.name
-		emit_signal("transitioned", self.get_path_to(state))
+		return
+	
+	yield(owner, "ready")
+	_set_state(get_node(initial_state))
+	state.enter()
+	_state_name = state.name
+	emit_signal("transitioned", self.get_path_to(state))
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -92,6 +91,6 @@ func _set_is_active(value: bool) -> void:
 
 func _set_state(value: State) -> void:
 	state = value
-	_state_name.value = state.name
+	_state_name = state.name
 
 ### -----------------------------------------------------------------------------------------------

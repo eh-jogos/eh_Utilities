@@ -82,7 +82,8 @@ func has_property(p_property: String) -> bool:
 func set_source_properties() -> void:
 	for meta_property in custom_properties:
 		var original_property = custom_properties[meta_property]
-		_set(meta_property, node_inspector_control.get_meta(original_property))
+		if node_inspector_control.has_meta(original_property):
+			_set(meta_property, node_inspector_control.get_meta(original_property))
 
 ### -----------------------------------------------------------------------------------------------
 

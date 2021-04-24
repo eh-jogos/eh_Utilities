@@ -19,12 +19,12 @@ extends Reference
 
 #--- public variables - order: export > normal var > onready --------------------------------------
 
-var custom_properties: = {}
+var custom_properties: Dictionary = {}
 var node_origin: Node
-var node_inspector_control: Node
 
 #--- private variables - order: export > normal var > onready -------------------------------------
 
+var property_values: Dictionary = {}
 var _category_name: String = ""
 
 ### -----------------------------------------------------------------------------------------------
@@ -32,8 +32,7 @@ var _category_name: String = ""
 
 ### Built in Engine Methods -----------------------------------------------------------------------
 
-func _init(p_inspector: Node, p_origin: Node, properties: Array, category: String = "") -> void:
-	node_inspector_control = p_inspector
+func _init(p_origin: Node, properties: Array, category: String = "") -> void:
 	node_origin = p_origin
 	_category_name = category
 	for property in properties:
@@ -46,10 +45,6 @@ func _set(property: String, value) -> bool:
 	
 	if custom_properties.has(property):
 		node_origin.set(custom_properties[property], value)
-		node_inspector_control.set_meta(
-				custom_properties[property], 
-				value
-		)
 		has_handled = true
 	
 	return has_handled
@@ -58,10 +53,7 @@ func _set(property: String, value) -> bool:
 func _get(property: String):
 	var to_return = null
 	if custom_properties.has(property):
-		if node_inspector_control.has_meta(custom_properties[property]):
-			to_return = node_inspector_control.get_meta(custom_properties[property])
-		else:
-			to_return = node_origin.get(custom_properties[property])
+		to_return = node_origin.get(custom_properties[property])
 	
 	return to_return
 
@@ -82,8 +74,7 @@ func has_property(p_property: String) -> bool:
 func set_source_properties() -> void:
 	for meta_property in custom_properties:
 		var original_property = custom_properties[meta_property]
-		if node_inspector_control.has_meta(original_property):
-			_set(meta_property, node_inspector_control.get_meta(original_property))
+		_set(meta_property, _get(meta_property))
 
 ### -----------------------------------------------------------------------------------------------
 

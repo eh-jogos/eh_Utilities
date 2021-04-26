@@ -158,9 +158,14 @@ func _get_inspector_helper_from_property(property: String) -> eh_CustomInspector
 
 
 func _update_properties_for(export_token: String, unused_properties: Array) -> void:
-	var script: GDScript = get_parent().get_script()
 	settings[export_token].properties.clear()
+	var script: GDScript = get_parent().get_script()
+	_analyze_script(script, export_token, unused_properties)
 	
+	_create_new_inspector_helper(export_token)
+
+
+func _analyze_script(script: GDScript, export_token: String, unused_properties: Array) -> void:
 	var export_comment_begin = script.source_code.find(export_token)
 	while export_comment_begin != -1:
 		var export_comment_end = script.source_code.find("\n", export_comment_begin) 
@@ -192,7 +197,9 @@ func _update_properties_for(export_token: String, unused_properties: Array) -> v
 		
 		export_comment_begin = script.source_code.find(export_token, export_comment_end)
 	
-	_create_new_inspector_helper(export_token)
+	var base_script = script.get_base_script()
+	if base_script:
+		_analyze_script(base_script, export_token, unused_properties)
 
 
 func _get_property_name(property_line: String, export_token: String) -> String:
@@ -218,10 +225,6 @@ func _get_property_name(property_line: String, export_token: String) -> String:
 	).strip_edges()
 	
 	return property_name
-
-
-func _set_settings(value: Dictionary) -> void:
-	settings = value
 
 
 func _create_new_inspector_helper(export_token: String) -> void:

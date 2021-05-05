@@ -79,12 +79,12 @@ func _get(property: String):
 		to_return = _saved_data
 	else:
 		var original_property = property.right(1)
-		var inspector_helper: eh_CustomInspector = _get_inspector_helper_from_property(property)
-		if inspector_helper == null:
-			if _saved_data.has(original_property):
-				to_return = _saved_data[original_property]
+		if _saved_data.has(original_property):
+			to_return = _saved_data[original_property]
 		else:
-			to_return = inspector_helper._get(property)
+			var inspector_helper: eh_CustomInspector = _get_inspector_helper_from_property(property)
+			if inspector_helper != null:
+				to_return = inspector_helper._get(property)
 
 	return to_return
 

@@ -45,7 +45,7 @@ func _set(property: String, value) -> bool:
 	
 	if custom_properties.has(property):
 		node_origin.set(custom_properties[property], value)
-		has_handled = true
+		has_handled = node_origin.get(custom_properties[property]) == value
 	
 	return has_handled
 

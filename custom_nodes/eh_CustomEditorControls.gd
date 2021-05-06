@@ -61,13 +61,14 @@ func _set(property: String, value) -> bool:
 		has_handled = true
 	else:
 		var original_property = property.right(1)
-		_saved_data[property.right(1)] = value
 		var inspector_helper: eh_CustomInspector = _get_inspector_helper_from_property(property)
 		
 		if inspector_helper == null:
 			return has_handled
 		
 		has_handled = inspector_helper._set(property, value)
+		if has_handled:
+			_saved_data[property.right(1)] = value
 	
 	return has_handled
 

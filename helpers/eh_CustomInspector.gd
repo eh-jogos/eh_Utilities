@@ -36,30 +36,35 @@ func _init(p_origin: Node, properties: Array, category: String = "") -> void:
 	node_origin = p_origin
 	_category_name = category
 	for property in properties:
-		var key: String = "_%s"%[property]
-		custom_properties[key] = property
+		if property is Array:
+			_build_group_of_properties(property)
+		else:
+			var key: String = "_%s"%[property]
+			custom_properties[key] = property
 
 
 func _set(property: String, value) -> bool:
 	var has_handled: = false
 	
-	if custom_properties.has(property):
-		node_origin.set(custom_properties[property], value)
-		has_handled = node_origin.get(custom_properties[property]) == value
+	var original_property: String = _get_original_property(property)
+	if original_property != "":
+		node_origin.set(original_property, value)
+		has_handled = node_origin.get(original_property) == value
 	
 	return has_handled
 
 
 func _get(property: String):
 	var to_return = null
-	if custom_properties.has(property):
-		to_return = node_origin.get(custom_properties[property])
+	var original_property: String = _get_original_property(property)
+	if original_property != "":
+		to_return = node_origin.get(original_property)
 	
 	return to_return
 
 
 func _get_property_list() -> Array:
-	var properties: = _get_properties_for(custom_properties.keys())
+	var properties: = _get_treated_property_list()
 	return properties
 
 ### -----------------------------------------------------------------------------------------------
@@ -81,8 +86,49 @@ func set_source_properties() -> void:
 
 ### Private Methods -------------------------------------------------------------------------------
 
+func _build_group_of_properties(group: Array) -> void:
+	var group_name: String = ""
+	for index in group.size():
+		var property: String = group[index] as String
+		if property == null:
+			push_error("All values inside the group array must be strings")
+			return
+		
+		if index == 0:
+			group_name = _get_group_name_from(property)
+			custom_properties[group_name] = {}
+		
+		var key: String = "_%s"%[property]
+		custom_properties[group_name][key] = property
+
+
+func _get_group_name_from(property: String) -> String:
+	property = property.trim_prefix("_")
+	var parts: = property.split("_")
+	return parts[0]
+
+
+func _get_original_property(property: String) -> String:
+	var original_property: = ""
+	for key in custom_properties:
+		var value = custom_properties[key]
+		if value is String:
+			if key == property:
+				original_property = custom_properties[key]
+				break
+		elif value is Dictionary:
+			for group_property in value:
+				if group_property == property:
+					original_property = custom_properties[key][group_property]
+					break
+	
+	print("looking for: %s | found: %s"%[property, original_property])
+	
+	return original_property
+
+
 func _get_property_category() -> Dictionary:
-	var dict = {
+	var dict: = {
 		name = _category_name,
 		type = TYPE_NIL,
 		usage = PROPERTY_USAGE_CATEGORY,
@@ -90,10 +136,24 @@ func _get_property_category() -> Dictionary:
 	return dict
 
 
-func _get_property_dict(property_name: String) -> Dictionary:
-	var dict = {
+func _get_property_group(group_name: String) -> Dictionary:
+	var dict: = {
+		name = group_name,
+		type = TYPE_NIL,
+		usage = PROPERTY_USAGE_GROUP,
+		hint_string = "_%s_"%[group_name]
+	}
+	return dict
+
+
+func _get_property_dict(property_name: String, original_property: String) -> Dictionary:
+	var type = typeof(node_origin.get(original_property)) 
+	if type == TYPE_NIL:
+		type = TYPE_OBJECT
+	
+	var dict: = {
 		name = "%s"%[property_name],
-		type = TYPE_OBJECT,
+		type = type,
 		usage = PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_SCRIPT_VARIABLE,
 		hint = PROPERTY_HINT_RESOURCE_TYPE,
 		hint_string = "Resource"
@@ -101,13 +161,22 @@ func _get_property_dict(property_name: String) -> Dictionary:
 	return dict
 
 
-func _get_properties_for(names: PoolStringArray) ->  Array:
+func _get_treated_property_list() ->  Array:
 	var properties: = []
 	if _category_name != "":
 		properties.append(_get_property_category())
 	
-	for name in names:
-		properties.append(_get_property_dict(name))
+	for key in custom_properties:
+		var value = custom_properties[key]
+		if value is String:
+			properties.append(_get_property_dict(key, value))
+		elif value is Dictionary:
+			properties.append(_get_property_group(key))
+			for property_name in custom_properties[key]:
+				properties.append(
+						_get_property_dict(property_name, custom_properties[key][property_name])
+				)
+	
 	return properties
 
 

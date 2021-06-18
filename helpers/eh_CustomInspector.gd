@@ -158,8 +158,6 @@ func _get_original_property(property: String) -> String:
 					original_property = custom_properties[key][group_property]
 					break
 	
-	print("looking for: %s | found: %s"%[property, original_property])
-	
 	return original_property
 
 

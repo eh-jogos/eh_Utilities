@@ -1,7 +1,7 @@
 # Fowards any change to a Control's rect to another remote Control Node. Similar to 
 # RemoteTransform2D but for Control Nodes.
 tool
-class_name RemoteRect
+class_name eh_RemoteRect
 extends Node
 
 ### Member Variables and Dependencies -------------------------------------------------------------

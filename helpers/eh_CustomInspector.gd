@@ -3,10 +3,46 @@
 # `eh_CustomEditorControls` to make the process fully automated. 
 #
 # But you can use this directly as well if you wish, by instancing it in any script and then 
-# delegating the `_get_property_list`, `_get` and `_set` methods to it.  Then during `_ready()` 
-# make sure to call `set_source_properties` so that the values that are saved in the properties 
-# shown in the editor are set back to the variables in the script. That's basically what
-# `eh_CustinEditorControls take care of for you.
+# delegating the `_get_property_list`, `_get` and `_set` methods to it.  
+#
+# Example snippet to copy-paste where you want to use it directly:
+#
+###################################################################################################
+# Custom Inspector ################################################################################
+###################################################################################################
+#
+#var _custom_inspector: eh_CustomInspector = eh_CustomInspector.new(
+#	object,
+#	[properties [grouped_properties]],
+#	"category"
+#)
+#
+#### Editor Methods --------------------------------------------------------------------------------
+#
+#func _get_property_list() -> Array:
+#	var properties: = _custom_inspector._get_property_list()
+#	return properties
+#
+#
+#func _get(property: String):
+#	return _custom_inspector._get(property)
+#
+#
+#func _set(property: String, value) -> bool:
+#	var has_handled: = _custom_inspector._set(property, value)
+#	if has_handled:
+#		update_configuration_warning()
+#		property_list_changed_notify()
+#	return has_handled
+#
+#
+#func _get_configuration_warning() -> String:
+#	var msg: = ""
+#
+#	return msg
+#
+#### -----------------------------------------------------------------------------------------------
+
 class_name eh_CustomInspector
 extends Reference
 

@@ -1,6 +1,6 @@
-# Write your doc string for this file here
-class_name eh_DirectoryHelpers
-extends Reference
+# Based on GDQuest's State
+class_name State
+extends Node
 
 ### Member Variables and Dependencies -------------------------------------------------------------
 #--- signals --------------------------------------------------------------------------------------
@@ -9,59 +9,70 @@ extends Reference
 
 #--- constants ------------------------------------------------------------------------------------
 
+const CLASS_STRING = "State"
+
 #--- public variables - order: export > normal var > onready --------------------------------------
 
 #--- private variables - order: export > normal var > onready -------------------------------------
+
+var _parent: State = null
+
+onready var _state_machine: = _get_state_machine(self)
 
 ### -----------------------------------------------------------------------------------------------
 
 
 ### Built in Engine Methods -----------------------------------------------------------------------
 
+func _ready() -> void:
+	if eh_EditorHelpers.is_editor():
+		eh_EditorHelpers.disable_all_processing(self)
+	yield(owner, "ready")
+	_parent = get_parent() as State
+
+
+func is_class(p_class: String) -> bool:
+	return p_class == CLASS_STRING or .is_class(p_class)
+
+
+func get_class() -> String:
+	return CLASS_STRING
+
 ### -----------------------------------------------------------------------------------------------
 
 
 ### Public Methods --------------------------------------------------------------------------------
 
-static func list_dir(path, omit_first_print: = false) -> void:
-	if not omit_first_print:
-		print("\nPRINTING FOLDER: %s"%[path])
-	var dir = Directory.new()
-	dir.open(path)
-	dir.list_dir_begin(true, true)
-	var next = dir.get_next()
-	while next != "":
-		print(next)
-		if dir.current_is_dir():
-			list_dir("%s/%s"%[path, next], true)
-		next = dir.get_next()
+func enter(_msg: = {}) -> void:
+	return
 
 
-static func load_from_folder_to_dict(
-		folder_path: String, target_dict: Dictionary, type_hint: String = ""
-	) -> void:
-	var dir: = Directory.new()
-	dir.open(folder_path)
-	dir.list_dir_begin(true)
-	var next: = dir.get_next()
-	while next != "":
-		if not dir.current_is_dir():
-			var item = load(folder_path + next)
-			if type_hint != "" and not item.is_class(type_hint):
-				next = dir.get_next()
-				continue
-			
-			var key: = next.replace(item.resource_path.get_extension(), "")
-			target_dict[key] = item
-		else:
-			load_from_folder_to_dict(folder_path, target_dict, type_hint)
-		
-		next = dir.get_next()
-	dir.list_dir_end()
+func unhandled_input(_event: InputEvent) -> void:
+	return
+
+
+func process(_delta: float) -> void:
+	return
+
+
+func physics_process(_delta: float) -> void:
+	return
+
+
+func exit() -> void:
+	return
 
 ### -----------------------------------------------------------------------------------------------
 
 
 ### Private Methods -------------------------------------------------------------------------------
+
+func _get_state_machine(node: Node) -> Node:
+	if node == null:
+		push_error("Couldn't find a StateMachine in this scene tree. State name: %s"%[name])
+	elif not node.is_class("StateMachine"):
+		node = _get_state_machine(node.get_parent())
+	
+	return node 
 
 ### -----------------------------------------------------------------------------------------------

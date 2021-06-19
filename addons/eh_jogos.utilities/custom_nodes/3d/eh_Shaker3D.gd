@@ -75,7 +75,7 @@ func _ready():
 	
 	_update_base_values()
 	
-	add_child(_timer)
+	add_child(_timer, true)
 	_timer.one_shot = true
 	_timer.connect("timeout", self, "_on_timer_timeout")
 	_timer.start(TIME_UNIT)

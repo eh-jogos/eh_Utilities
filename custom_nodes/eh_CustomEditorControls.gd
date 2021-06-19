@@ -25,12 +25,11 @@ extends Node
 
 #--- public variables - order: export > normal var > onready --------------------------------------
 
-export var settings: Dictionary = {}
+export var settings: Dictionary = {} 
 
 #--- private variables - order: export > normal var > onready -------------------------------------
 
-var _properties_to_expose: Dictionary = {}
-
+var _saved_data: Dictionary = {}
 var _inspector_helpers: Dictionary = {}
 
 ### -----------------------------------------------------------------------------------------------
@@ -39,42 +38,66 @@ var _inspector_helpers: Dictionary = {}
 ### Built in Engine Methods -----------------------------------------------------------------------
 
 func _ready() -> void:
-	update_properties_to_expose()
+	for property in _saved_data:
+		if property in get_parent():
+			get_parent().set(property, _saved_data[property])
+		else:
+			push_warning("Could not find %s in %s | Path: %s"%[
+					property, get_parent().name, get_parent().get_path()
+			])
 	
-	for value in _inspector_helpers.values():
-		var helper: eh_CustomInspector = value as eh_CustomInspector
-		helper.set_source_properties()
-	
-	if not Engine.editor_hint:
+	if Engine.editor_hint:
+		update_properties_to_expose()
+		update_configuration_warning()
+	else:
 		queue_free()
-	
-	update_configuration_warning()
 
 
 func _set(property: String, value) -> bool:
 	var has_handled: = false
 	
-	var inspector_helper: eh_CustomInspector = _get_inspector_helper_from_property(property)
-	if inspector_helper == null:
-		return has_handled
+	if property == "_0_saved_data":
+		_saved_data = value
+		has_handled = true
+	else:
+		var original_property = property.right(1)
+		var inspector_helper: eh_CustomInspector = _get_inspector_helper_from_property(property)
+		
+		if inspector_helper == null:
+			return has_handled
+		
+		has_handled = inspector_helper._set(property, value)
+		if has_handled:
+			_saved_data[property.right(1)] = value
 	
-	has_handled = inspector_helper._set(property, value)
 	return has_handled
 
 
 func _get(property: String):
 	var to_return = null
 	
-	var inspector_helper: eh_CustomInspector = _get_inspector_helper_from_property(property)
-	if inspector_helper == null:
-		return to_return
-	
-	to_return = inspector_helper._get(property)
+	if property == "_0_saved_data":
+		to_return = _saved_data
+	else:
+		var original_property = property.right(1)
+		if _saved_data.has(original_property):
+			to_return = _saved_data[original_property]
+		else:
+			var inspector_helper: eh_CustomInspector = _get_inspector_helper_from_property(property)
+			if inspector_helper != null:
+				to_return = inspector_helper._get(property)
+
 	return to_return
 
 
 func _get_property_list() -> Array:
 	var properties: Array = []
+	
+	properties.append({
+		"name": "_0_saved_data",
+		"type": TYPE_DICTIONARY,
+		"usage": PROPERTY_USAGE_STORAGE
+	})
 	
 	for key in _inspector_helpers:
 		var inspector_helper: eh_CustomInspector = _inspector_helpers[key] as eh_CustomInspector
@@ -102,10 +125,13 @@ func _get_configuration_warning() -> String:
 
 func update_properties_to_expose() -> void:
 	_set_default_token_and_category()
-	_properties_to_expose.clear()
 	
+	var unused_properties: = _saved_data.keys()
 	for key in settings:
-		_update_properties_for(key, settings[key])
+		_update_properties_for(key, unused_properties)
+	
+	for property in unused_properties:
+		_saved_data.erase(property)
 	
 	property_list_changed_notify()
 
@@ -115,7 +141,10 @@ func update_properties_to_expose() -> void:
 ### Private Methods -------------------------------------------------------------------------------
 
 func _set_default_token_and_category() -> void:
-	settings["#cr-export"] = "Custom Resources"
+	settings["#cr-export"] = {
+		category = "Custom Resources",
+		properties = []
+	}
 
 
 func _get_inspector_helper_from_property(property: String) -> eh_CustomInspector:
@@ -129,10 +158,15 @@ func _get_inspector_helper_from_property(property: String) -> eh_CustomInspector
 	return inspector_helper
 
 
-func _update_properties_for(export_token: String, category_name: String) -> void:
-	_properties_to_expose[export_token] = []
+func _update_properties_for(export_token: String, unused_properties: Array) -> void:
+	settings[export_token].properties.clear()
 	var script: GDScript = get_parent().get_script()
+	_analyze_script(script, export_token, unused_properties)
 	
+	_create_new_inspector_helper(export_token)
+
+
+func _analyze_script(script: GDScript, export_token: String, unused_properties: Array) -> void:
 	var export_comment_begin = script.source_code.find(export_token)
 	while export_comment_begin != -1:
 		var export_comment_end = script.source_code.find("\n", export_comment_begin) 
@@ -155,21 +189,18 @@ func _update_properties_for(export_token: String, category_name: String) -> void
 				push_error("ABORTING | Unable to get a property name from %s"%[property_line])
 				break
 			
-			_properties_to_expose[export_token].append(property_name)
+			settings[export_token].properties.append(property_name)
+			if not _saved_data.has(property_name):
+				_saved_data[property_name] = null
+			
+			if unused_properties.has(property_name):
+				unused_properties.erase(property_name)
 		
 		export_comment_begin = script.source_code.find(export_token, export_comment_end)
 	
-	if _properties_to_expose[export_token].empty():
-		if has_meta(export_token):
-			_properties_to_expose[export_token] = get_meta(export_token)
-	
-	_inspector_helpers[export_token] = eh_CustomInspector.new(
-			self, 
-			get_parent(), 
-			_properties_to_expose[export_token], 
-			category_name
-	)
-	set_meta(export_token, _inspector_helpers[export_token].custom_properties.values())
+	var base_script = script.get_base_script()
+	if base_script:
+		_analyze_script(base_script, export_token, unused_properties)
 
 
 func _get_property_name(property_line: String, export_token: String) -> String:
@@ -195,5 +226,13 @@ func _get_property_name(property_line: String, export_token: String) -> String:
 	).strip_edges()
 	
 	return property_name
+
+
+func _create_new_inspector_helper(export_token: String) -> void:
+	_inspector_helpers[export_token] = eh_CustomInspector.new(
+			get_parent(), 
+			settings[export_token].properties, 
+			settings[export_token].category
+	)
 
 ### -----------------------------------------------------------------------------------------------

@@ -16,6 +16,7 @@ corner_radius_bottom_left = 20
 [node name="DebugDisplay" type="PanelContainer"]
 margin_right = 314.0
 margin_bottom = 20.0
+mouse_filter = 2
 custom_styles/panel = SubResource( 1 )
 script = ExtResource( 1 )
 __meta__ = {
@@ -27,3 +28,4 @@ margin_left = 10.0
 margin_top = 10.0
 margin_right = 304.0
 margin_bottom = 10.0
+mouse_filter = 2

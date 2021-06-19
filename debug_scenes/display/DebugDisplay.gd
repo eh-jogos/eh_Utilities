@@ -11,6 +11,7 @@ extends PanelContainer
 
 #--- public variables - order: export > normal var > onready --------------------------------------
 
+export var mouse_over_alpha: float = 0.3
 export(Array, Resource) var debug_variables_list: Array = [] \
 		setget _set_debug_variables_array, _get_debug_variables_array
 
@@ -26,7 +27,18 @@ onready var _list: VBoxContainer = $List
 func _ready() -> void:
 	if eh_EditorHelpers.is_editor():
 		eh_EditorHelpers.disable_all_processing(self)
+		return
+	
 	pass
+
+
+func _input(event: InputEvent) -> void:
+	var mouse_motion: InputEventMouseMotion = event as InputEventMouseMotion
+	if mouse_motion != null and get_rect().has_point(mouse_motion.position):
+		modulate.a = mouse_over_alpha
+	else:
+		if modulate.a != 1.0:
+			modulate.a = 1.0
 
 ### -----------------------------------------------------------------------------------------------
 

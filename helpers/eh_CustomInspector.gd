@@ -181,16 +181,21 @@ func _get_property_group(group_name: String) -> Dictionary:
 
 
 func _get_property_dict(property_name: String, original_property: String) -> Dictionary:
-	var type = typeof(node_origin.get(original_property)) 
+	var type: = typeof(node_origin.get(original_property)) 
+	var hint: = PROPERTY_HINT_NONE
+	var hint_string: = ""
+	
 	if type == TYPE_NIL:
 		type = TYPE_OBJECT
+		hint = PROPERTY_HINT_RESOURCE_TYPE
+		hint_string = "Resource"
 	
 	var dict: = {
 		name = "%s"%[property_name],
 		type = type,
 		usage = PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_SCRIPT_VARIABLE,
-		hint = PROPERTY_HINT_RESOURCE_TYPE,
-		hint_string = "Resource"
+		hint = hint,
+		hint_string = hint_string
 	}
 	return dict
 

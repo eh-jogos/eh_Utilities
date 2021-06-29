@@ -51,7 +51,7 @@ static func load_from_folder_to_dict(
 				next = dir.get_next()
 				continue
 			
-			var key: = next.replace(item.resource_path.get_extension(), "")
+			var key: = next.replace(".%s"%[item.resource_path.get_extension()], "")
 			target_dict[key] = item
 		else:
 			load_from_folder_to_dict(folder_path, target_dict, type_hint)

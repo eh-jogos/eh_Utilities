@@ -68,6 +68,9 @@ func exit() -> void:
 ### Private Methods -------------------------------------------------------------------------------
 
 func _get_state_machine(node: Node) -> Node:
+	if eh_EditorHelpers.is_editor():
+		return node
+	
 	if node == null:
 		push_error("Couldn't find a StateMachine in this scene tree. State name: %s"%[name])
 	elif not node.is_class("StateMachine"):

@@ -27,6 +27,7 @@ onready var _state_machine: = _get_state_machine(self)
 func _ready() -> void:
 	if eh_EditorHelpers.is_editor():
 		eh_EditorHelpers.disable_all_processing(self)
+		return
 	yield(owner, "ready")
 	_parent = get_parent() as State
 

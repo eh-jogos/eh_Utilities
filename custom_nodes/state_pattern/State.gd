@@ -15,8 +15,6 @@ const CLASS_STRING = "State"
 
 #--- private variables - order: export > normal var > onready -------------------------------------
 
-var _parent: State = null
-
 onready var _state_machine: = _get_state_machine(self)
 
 ### -----------------------------------------------------------------------------------------------
@@ -29,7 +27,6 @@ func _ready() -> void:
 		eh_EditorHelpers.disable_all_processing(self)
 		return
 	yield(owner, "ready")
-	_parent = get_parent() as State
 
 
 func is_class(p_class: String) -> bool:

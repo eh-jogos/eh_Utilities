@@ -62,6 +62,10 @@ static func disconnect_between(
 		from.disconnect(p_signal, to, p_callback)
 
 
+static func get_reverse_range_for(p_array: Array) -> Array:
+	return range(p_array.size()-1, -1, -1)
+
+
 static func not_alright_error(who:Object, why: String, where: Script) -> void:
 	var who_name: String = ""
 	if who is Node:

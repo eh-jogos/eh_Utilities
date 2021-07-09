@@ -17,7 +17,7 @@ export(Array, Resource) var debug_variables_list: Array = [] \
 
 #--- private variables - order: export > normal var > onready -------------------------------------
 
-onready var _list: VBoxContainer = $List
+onready var _list: VBoxContainer = $Content/List
 
 ### -----------------------------------------------------------------------------------------------
 

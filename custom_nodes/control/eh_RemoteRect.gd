@@ -109,7 +109,15 @@ func _set_remote_path(value: NodePath) -> void:
 
 var _custom_inspector: eh_CustomInspector = eh_CustomInspector.new(
 	self,
-	[["update_position", "update_size", "update_rotation", "update_scale", "update_pivot_offset"]],
+	[
+		{"update": [
+			"update_position", 
+			"update_size", 
+			"update_rotation", 
+			"update_scale", 
+			"update_pivot_offset"
+		]}
+	],
 	""
 )
 

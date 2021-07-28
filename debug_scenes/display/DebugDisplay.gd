@@ -17,6 +17,9 @@ export(Array, Resource) var debug_variables_list: Array = [] \
 
 #--- private variables - order: export > normal var > onready -------------------------------------
 
+#sv-export
+var _is_debug_display_active: BoolVariable
+
 onready var _list: VBoxContainer = $Content/List
 
 ### -----------------------------------------------------------------------------------------------
@@ -29,7 +32,8 @@ func _ready() -> void:
 		eh_EditorHelpers.disable_all_processing(self)
 		return
 	
-	pass
+	visible = _is_debug_display_active.value
+	_is_debug_display_active.connect_to(self, "_on_is_debug_display_active_value_updated")
 
 
 func _input(event: InputEvent) -> void:
@@ -39,6 +43,9 @@ func _input(event: InputEvent) -> void:
 	else:
 		if modulate.a != 1.0:
 			modulate.a = 1.0
+	
+	if event.is_action_pressed("debug_toggle_display"):
+		_is_debug_display_active.value = !_is_debug_display_active.value
 
 ### -----------------------------------------------------------------------------------------------
 
@@ -109,5 +116,9 @@ func _get_debug_variables_array() -> Array:
 			debug_variables_list.erase(object)
 	
 	return debug_variables_list
+
+
+func _on_is_debug_display_active_value_updated() -> void:
+	visible = _is_debug_display_active.value
 
 ### -----------------------------------------------------------------------------------------------

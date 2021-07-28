@@ -1,7 +1,9 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://addons/eh_jogos.utilities/debug_scenes/display/DebugDisplay.gd" type="Script" id=1]
 [ext_resource path="res://addons/eh_jogos.utilities/debug_scenes/display/FPS.gd" type="Script" id=2]
+[ext_resource path="res://addons/eh_jogos.shared_variables/inspector_plugin/SVEditorControls.gd" type="Script" id=3]
+[ext_resource path="res://addons/eh_jogos.utilities/debug_scenes/display/bool_is_debug_display_active.tres" type="Resource" id=4]
 
 [sub_resource type="StyleBoxFlat" id=1]
 content_margin_left = 10.0
@@ -23,6 +25,23 @@ script = ExtResource( 1 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="SVEditorControls" type="Node" parent="."]
+script = ExtResource( 3 )
+settings = {
+"#cr-export": {
+"category": "Custom Resources",
+"properties": [  ]
+},
+"#sv-export": {
+"category": "Shared Variables",
+"properties": [ "_is_debug_display_active" ]
+}
+}
+_0_saved_data = {
+"_is_debug_display_active": ExtResource( 4 )
+}
+__is_debug_display_active = ExtResource( 4 )
 
 [node name="Content" type="VBoxContainer" parent="."]
 margin_left = 10.0

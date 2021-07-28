@@ -42,7 +42,7 @@ func _enter_tree() -> void:
 ### Public Methods --------------------------------------------------------------------------------
 
 func update_rect() -> void:
-	if _parent_control == null:
+	if not is_instance_valid(_parent_control):
 		return
 	
 	if update_pivot_offset:

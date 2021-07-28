@@ -86,7 +86,7 @@ func _get_cleaned_variables_list() -> Array:
 	var clean_copy = debug_variables_list.duplicate()
 	
 	for index in range(clean_copy.size() -1 , -1, -1):
-		if clean_copy[index] == null:
+		if not is_instance_valid(clean_copy[index]):
 			clean_copy.remove(index)
 	
 	return clean_copy
@@ -94,7 +94,7 @@ func _get_cleaned_variables_list() -> Array:
 
 func _set_debug_variables_array(value: Array) -> void:
 	for index in range(value.size() - 1 , -1, -1):
-		if value[index] == null:
+		if not is_instance_valid(value[index]):
 			continue
 		
 		var shared_variable: SharedVariable = value[index]
@@ -110,7 +110,7 @@ func _set_debug_variables_array(value: Array) -> void:
 func _get_debug_variables_array() -> Array:
 	for index in range(debug_variables_list.size() - 1 , -1, -1):
 		var object: Object = debug_variables_list[index]
-		if object == null:
+		if not is_instance_valid(object):
 			continue
 		elif not object.has_signal("value_updated"):
 			debug_variables_list.erase(object)

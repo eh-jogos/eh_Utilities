@@ -6,7 +6,6 @@
 # is activated or not, so things like the helpers in the static folder will work just as usual,
 # but the custom nodes and custom resources will have their workflow hindered.
 tool
-class_name eh_UtilitiesEditorPlugin
 extends EditorPlugin
 
 ### Member Variables and Dependencies -------------------------------------------------------------

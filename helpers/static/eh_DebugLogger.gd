@@ -9,6 +9,7 @@ extends Reference
 
 #--- constants ------------------------------------------------------------------------------------
 
+const LOGGING_SETTING = "eh_utilities/logging_enabled"
 const LOG_FILE = "user://debug_session.log"
 const RELEASE_LOG_FILE = "res://session.log"
 
@@ -27,11 +28,12 @@ const RELEASE_LOG_FILE = "res://session.log"
 ### Public Methods --------------------------------------------------------------------------------
 
 static func start_new_log() -> void:
-	if not ProjectSettings.get_setting(eh_UtilitiesEditorPlugin.SETTING_LOGGING_ENABLED):
+	if not _is_logging_enabled():
 		return
 	
 	var file_path = LOG_FILE if OS.has_feature("debug") else RELEASE_LOG_FILE
 	
+	# Improve this later to make it properly with all the error checks
 	var file = File.new()
 	file.open(file_path, File.WRITE)
 	file.store_string("")
@@ -39,13 +41,14 @@ static func start_new_log() -> void:
 
 
 static func log_message(msg: String) -> void:
-	if not ProjectSettings.get_setting(eh_UtilitiesEditorPlugin.SETTING_LOGGING_ENABLED):
+	if not _is_logging_enabled() or not _has_created_log_file():
 		return
 	
 	var date_time: = get_date_time_string()
 	var log_entry: = "%s - %09d - %s \n"%[date_time, OS.get_ticks_msec(), msg]
 	var file_path = LOG_FILE if OS.has_feature("debug") else RELEASE_LOG_FILE
 	
+	# Improve this later to make it properly with all the error checks
 	var file = File.new()
 	file.open(file_path, File.READ_WRITE)
 	
@@ -72,5 +75,14 @@ static func get_date_time_string() -> String:
 
 
 ### Private Methods -------------------------------------------------------------------------------
+
+static func _is_logging_enabled() -> bool:
+	return ProjectSettings.get_setting(LOGGING_SETTING)
+
+
+static func _has_created_log_file() -> bool:
+	var file_path = LOG_FILE if OS.has_feature("debug") else RELEASE_LOG_FILE
+	var file: = File.new()
+	return file.file_exists(file_path)
 
 ### -----------------------------------------------------------------------------------------------

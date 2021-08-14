@@ -7,6 +7,11 @@
 # - Be careful that the script isn't doing anything you don't want to happen in the editor in 
 # default engine functions like `_ready()` and the process and input functions. Checking for 
 # `Engine.editor_hint` might help with that.
+# - Because we are using `tool`, if the script has an error, and you save, after you fix the error 
+# and save again, all the values you had set in the scene are lost. To avoid that:
+#   - close the scene without saving before you fix the script. This will only affect opened scenes.
+#   - If you're using git, try to commit the file or at least stage it before doing anything 
+# dangerous in sensitive scripts so that you can have an easy way to restore lost values.
 # - If your properties have the same name as your member variables, `_set` and `_get` will never 
 # get called for them, but if you need them to anything other then just a simple set or get, you'll 
 # need to define setters and getters with the `setget`keyword for them.
@@ -21,7 +26,7 @@
 # Custom Inspector ################################################################################
 ###################################################################################################
 #
-##### Editor Methods --------------------------------------------------------------------------------
+#### Editor Methods --------------------------------------------------------------------------------
 #
 #func _get_property_list() -> Array:
 #	var properties: = []
@@ -46,7 +51,7 @@
 #
 #	return msg
 #
-##### -----------------------------------------------------------------------------------------------
+#### -----------------------------------------------------------------------------------------------
 
 class_name eh_InspectorHelper
 extends Reference

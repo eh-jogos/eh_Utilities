@@ -109,6 +109,15 @@ static func get_property_dict_for(
 		hint_string = _get_hint_string_for(p_type) if p_hint_string == "" else p_hint_string
 	}
 
+
+static func get_enum_hint_for(string_array: PoolStringArray) -> String:
+	for index in string_array.size():
+		var string: String = string_array[index]
+		string_array[index] = string.capitalize()
+	
+	var enum_hint: = string_array.join(",")
+	return enum_hint
+
 ### -----------------------------------------------------------------------------------------------
 
 

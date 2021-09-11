@@ -98,16 +98,40 @@ static func get_property_dict_for(
 			p_name: String, 
 			p_type: int, 
 			p_usage: = PROPERTY_USAGE_DEFAULT, 
-			p_hint: = -1, 
+			p_hint: = PROPERTY_HINT_NONE,
 			p_hint_string: = ""
 	) -> Dictionary:
 	return {
 		name = p_name,
 		type = p_type,
 		usage = p_usage,
-		hint = _get_hint_for(p_type) if p_hint == -1 else p_hint,
-		hint_string = _get_hint_string_for(p_type) if p_hint_string == "" else p_hint_string
+		hint = p_hint,
+		hint_string = p_hint_string
 	}
+
+
+static func get_int_range_property_dict_for(
+		p_name: String, p_range_hint: String, p_usage: = PROPERTY_USAGE_DEFAULT
+) -> Dictionary:
+	return get_property_dict_for(
+			p_name, TYPE_INT, p_usage, PROPERTY_HINT_RANGE, p_range_hint
+	)
+
+
+static func get_float_range_property_dict_for(
+		p_name: String, p_range_hint: String, p_usage: = PROPERTY_USAGE_DEFAULT
+) -> Dictionary:
+	return get_property_dict_for(
+			p_name, TYPE_REAL, p_usage, PROPERTY_HINT_RANGE, p_range_hint
+	)
+
+
+static func get_int_enum_property_dict_for(
+		p_name: String, p_enum_hint: String, p_usage: = PROPERTY_USAGE_DEFAULT
+) -> Dictionary:
+	return get_property_dict_for(
+			p_name, TYPE_INT, p_usage, PROPERTY_HINT_ENUM, p_enum_hint
+	)
 
 
 static func get_enum_hint_for(string_array: PoolStringArray) -> String:
@@ -122,24 +146,5 @@ static func get_enum_hint_for(string_array: PoolStringArray) -> String:
 
 
 ### Private Methods -------------------------------------------------------------------------------
-
-static func _get_hint_for(p_type: int) -> int:
-	var hint: int = PROPERTY_HINT_NONE
-	
-	match p_type:
-		TYPE_BOOL, TYPE_NODE_PATH, TYPE_VECTOR2:
-			hint = PROPERTY_HINT_NONE
-	
-	return hint
-
-
-static func _get_hint_string_for(p_type: int) -> String:
-	var hint_string: = ""
-	
-	match p_type:
-		TYPE_BOOL, TYPE_NODE_PATH:
-			hint_string = ""
-	
-	return hint_string
 
 ### -----------------------------------------------------------------------------------------------

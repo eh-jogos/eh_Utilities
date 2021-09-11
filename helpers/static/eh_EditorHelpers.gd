@@ -1,4 +1,4 @@
-# Write your doc string for this file here
+# Simple helper functions specially when writing code inside a `tool` script.
 class_name eh_EditorHelpers
 extends Reference
 

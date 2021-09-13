@@ -42,7 +42,7 @@ func _enter_tree() -> void:
 ### Public Methods --------------------------------------------------------------------------------
 
 func update_rect() -> void:
-	if _parent_control == null:
+	if not is_instance_valid(_parent_control):
 		return
 	
 	if update_pivot_offset:
@@ -109,7 +109,15 @@ func _set_remote_path(value: NodePath) -> void:
 
 var _custom_inspector: eh_CustomInspector = eh_CustomInspector.new(
 	self,
-	[["update_position", "update_size", "update_rotation", "update_scale", "update_pivot_offset"]],
+	[
+		{"update": [
+			"update_position", 
+			"update_size", 
+			"update_rotation", 
+			"update_scale", 
+			"update_pivot_offset"
+		]}
+	],
 	""
 )
 

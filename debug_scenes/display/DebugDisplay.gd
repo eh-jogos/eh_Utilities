@@ -17,7 +17,10 @@ export(Array, Resource) var debug_variables_list: Array = [] \
 
 #--- private variables - order: export > normal var > onready -------------------------------------
 
-onready var _list: VBoxContainer = $List
+#sv-export
+var _is_debug_display_active: BoolVariable
+
+onready var _list: VBoxContainer = $Content/List
 
 ### -----------------------------------------------------------------------------------------------
 
@@ -29,7 +32,8 @@ func _ready() -> void:
 		eh_EditorHelpers.disable_all_processing(self)
 		return
 	
-	pass
+	visible = _is_debug_display_active.value
+	_is_debug_display_active.connect_to(self, "_on_is_debug_display_active_value_updated")
 
 
 func _input(event: InputEvent) -> void:
@@ -39,6 +43,9 @@ func _input(event: InputEvent) -> void:
 	else:
 		if modulate.a != 1.0:
 			modulate.a = 1.0
+	
+	if event.is_action_pressed("debug_toggle_display"):
+		_is_debug_display_active.value = !_is_debug_display_active.value
 
 ### -----------------------------------------------------------------------------------------------
 
@@ -79,7 +86,7 @@ func _get_cleaned_variables_list() -> Array:
 	var clean_copy = debug_variables_list.duplicate()
 	
 	for index in range(clean_copy.size() -1 , -1, -1):
-		if clean_copy[index] == null:
+		if not is_instance_valid(clean_copy[index]):
 			clean_copy.remove(index)
 	
 	return clean_copy
@@ -87,7 +94,7 @@ func _get_cleaned_variables_list() -> Array:
 
 func _set_debug_variables_array(value: Array) -> void:
 	for index in range(value.size() - 1 , -1, -1):
-		if value[index] == null:
+		if not is_instance_valid(value[index]):
 			continue
 		
 		var shared_variable: SharedVariable = value[index]
@@ -103,11 +110,15 @@ func _set_debug_variables_array(value: Array) -> void:
 func _get_debug_variables_array() -> Array:
 	for index in range(debug_variables_list.size() - 1 , -1, -1):
 		var object: Object = debug_variables_list[index]
-		if object == null:
+		if not is_instance_valid(object):
 			continue
 		elif not object.has_signal("value_updated"):
 			debug_variables_list.erase(object)
 	
 	return debug_variables_list
+
+
+func _on_is_debug_display_active_value_updated() -> void:
+	visible = _is_debug_display_active.value
 
 ### -----------------------------------------------------------------------------------------------

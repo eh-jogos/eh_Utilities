@@ -15,8 +15,6 @@ const CLASS_STRING = "State"
 
 #--- private variables - order: export > normal var > onready -------------------------------------
 
-var _parent: State = null
-
 onready var _state_machine: = _get_state_machine(self)
 
 ### -----------------------------------------------------------------------------------------------
@@ -27,8 +25,8 @@ onready var _state_machine: = _get_state_machine(self)
 func _ready() -> void:
 	if eh_EditorHelpers.is_editor():
 		eh_EditorHelpers.disable_all_processing(self)
+		return
 	yield(owner, "ready")
-	_parent = get_parent() as State
 
 
 func is_class(p_class: String) -> bool:
@@ -68,6 +66,9 @@ func exit() -> void:
 ### Private Methods -------------------------------------------------------------------------------
 
 func _get_state_machine(node: Node) -> Node:
+	if eh_EditorHelpers.is_editor():
+		return node
+	
 	if node == null:
 		push_error("Couldn't find a StateMachine in this scene tree. State name: %s"%[name])
 	elif not node.is_class("StateMachine"):

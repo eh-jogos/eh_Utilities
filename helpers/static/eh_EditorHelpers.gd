@@ -62,6 +62,14 @@ static func disconnect_between(
 		from.disconnect(p_signal, to, p_callback)
 
 
+static func erase_key_from_dictionary(object: Object, dict_name: String, key: String) -> void:
+	var success = object.get(dict_name).erase(key)
+	if not success:
+		push_warning("Did not find key %s to delete in %s at %s"%[
+				key, dict_name, object.get_script()
+		])
+
+
 static func get_reverse_range_for(p_array: Array) -> Array:
 	return range(p_array.size()-1, -1, -1)
 

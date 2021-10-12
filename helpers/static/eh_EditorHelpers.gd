@@ -86,6 +86,19 @@ static func not_alright_error(who:Object, why: String, where: Script) -> void:
 		who_name = str(who)
 	push_error("%s is not alright and %s at %s"%[who_name, why, where.resource_path])
 
+
+static func add_debug_camera2D_to(node2D: Node2D, percent_offset: Vector2 = Vector2.INF) -> void:
+	var camera: = Camera2D.new()
+	camera.name = "DebugCamera2D"
+	camera.current = true
+	if percent_offset != Vector2.INF:
+		var viewport_size = node2D.get_viewport_rect().size
+		var total_offset = viewport_size * percent_offset
+		var centered_offset = total_offset / 2.0
+		camera.offset = centered_offset
+	
+	node2D.add_child(camera, true)
+
 ### -----------------------------------------------------------------------------------------------
 
 

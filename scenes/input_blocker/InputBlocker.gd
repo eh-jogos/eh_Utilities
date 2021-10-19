@@ -26,6 +26,11 @@ onready var _blocker = $Blocker
 
 func _ready():
 	_blocker.hide()
+	set_process_input(false)
+
+
+func _input(event: InputEvent) -> void:
+	get_tree().set_input_as_handled()
 
 ### -----------------------------------------------------------------------------------------------
 
@@ -33,6 +38,7 @@ func _ready():
 ### Public Methods --------------------------------------------------------------------------------
 
 func activate() -> void:
+	set_process_input(true)
 	_previous_focus = _blocker.get_focus_owner()
 	_blocker.show()
 	_blocker.grab_focus()
@@ -40,6 +46,7 @@ func activate() -> void:
 
 func deactivate() -> void:
 	_blocker.hide()
+	set_process_input(false)
 	if _previous_focus != null and is_instance_valid(_previous_focus):
 		_previous_focus.grab_focus()
 		_previous_focus = null

@@ -33,10 +33,12 @@ mouse_filter = 2
 
 [node name="ClearButton" type="Button" parent="Control"]
 anchor_left = 1.0
+anchor_top = 1.0
 anchor_right = 1.0
+anchor_bottom = 1.0
 margin_left = -43.0
-margin_top = -24.0
-margin_bottom = -4.0
+margin_top = 1.0
+margin_bottom = 21.0
 grow_horizontal = 0
 grow_vertical = 0
 text = "clear"

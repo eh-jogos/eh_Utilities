@@ -38,6 +38,10 @@ static func print_value(node: Node, key: String, value, max_size: float = INF) -
 	node.get_tree().call_group("debug_print", "_update_size", max_size)
 	node.get_tree().call_group("debug_print", "_print_value", key, value)
 
+
+static func clear(node: Node) -> void:
+	node.get_tree().call_group("debug_print", "_clear")
+
 ### -----------------------------------------------------------------------------------------------
 
 
@@ -59,11 +63,7 @@ func _print_value(key: String, value) -> void:
 		_update_text(label, key, value)
 
 
-func _update_text(label: Label, key: String, value) -> void:
-	label.text = "%s: %s [%s]"%[key, value, OS.get_ticks_msec()]
-
-
-func _on_ClearButton_pressed() -> void:
+func _clear() -> void:
 	_print_dict.clear()
 	for child in _list.get_children():
 		_list.remove_child(child)
@@ -71,9 +71,19 @@ func _on_ClearButton_pressed() -> void:
 	_reset_size()
 
 
+func _update_text(label: Label, key: String, value) -> void:
+	label.text = "%s: %s [%s]"%[key, value, OS.get_ticks_msec()]
+
+
+func _on_ClearButton_pressed() -> void:
+	_clear()
+
+
 func _reset_size() -> void:
 	margin_left = -_horizontral_size
 	margin_top = 0
+	margin_bottom = 0
+	pass
 
 
 func _update_size(max_size: float) -> void:

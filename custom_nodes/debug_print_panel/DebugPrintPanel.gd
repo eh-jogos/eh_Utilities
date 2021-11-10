@@ -27,6 +27,7 @@ onready var _list: VBoxContainer = $VBoxContainer
 ### Built in Engine Methods -----------------------------------------------------------------------
 
 func _ready() -> void:
+	_clear()
 	pass
 
 ### -----------------------------------------------------------------------------------------------
@@ -48,6 +49,9 @@ static func clear(node: Node) -> void:
 ### Private Methods -------------------------------------------------------------------------------
 
 func _print_value(key: String, value) -> void:
+	if not visible:
+		show()
+	
 	var treated_key = key.replace("/", "_").replace(" ", "_").replace(".","_").replace("@", "_AT_")
 	_print_dict[key] = value
 	if not _list.has_node(treated_key):
@@ -69,6 +73,8 @@ func _clear() -> void:
 		_list.remove_child(child)
 		child.queue_free()
 	_reset_size()
+	
+	hide()
 
 
 func _update_text(label: Label, key: String, value) -> void:

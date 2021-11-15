@@ -134,10 +134,21 @@ static func get_int_enum_property_dict_for(
 	)
 
 
-static func get_enum_hint_for(string_array: PoolStringArray) -> String:
+static func get_string_enum_property_dict_for(
+		p_name: String, p_enum_hint: String, p_usage: = PROPERTY_USAGE_DEFAULT
+) -> Dictionary:
+	return get_property_dict_for(
+			p_name, TYPE_STRING, p_usage, PROPERTY_HINT_ENUM, p_enum_hint
+	)
+
+
+static func get_enum_hint_for(
+		string_array: PoolStringArray, 
+		should_capitalize: = true
+) -> String:
 	for index in string_array.size():
 		var string: String = string_array[index]
-		string_array[index] = string.capitalize()
+		string_array[index] = string.capitalize() if should_capitalize else string
 	
 	var enum_hint: = string_array.join(",")
 	return enum_hint

@@ -104,6 +104,16 @@ static func add_debug_camera2D_to(
 	
 	node2D.add_child(camera, true)
 
+
+static func get_blend_position_paths_from(animation_tree: AnimationTree) -> Array:
+	var blend_positions = []
+	
+	for property in animation_tree.get_property_list():
+		if property.usage >= 7 and property.name.ends_with("blend_position"):
+			blend_positions.append(property.name)
+	
+	return blend_positions
+
 ### -----------------------------------------------------------------------------------------------
 
 

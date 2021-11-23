@@ -1,4 +1,4 @@
-# This is a helper nod to be used together with a `eh_Resetable` resource.
+# This is a helper node to be used together with a `eh_Resetable` resource.
 # Just add this node as a child of a node that you want to trigger a reset when it exits the tree,
 # and add the `eh_Resetable` resource you saved to disk in the exported variable of this node, using
 # the editor. Then whenever this node exits the tree, together with it's parent, it will trigger

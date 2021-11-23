@@ -1,6 +1,9 @@
-# Write your doc string for this file here
-class_name eh_DirectoryHelpers
-extends Reference
+# Useful scene for completely blocking input, can use it for things like Loading Screens,
+# waiting for server connection or when enabling Steam Overlay, for example.
+#
+# It's really usefull is it is setup as an Autoload so that you can call it from anywhere
+# and so that it's always above any screen.
+extends CanvasLayer
 
 ### Member Variables and Dependencies -------------------------------------------------------------
 #--- signals --------------------------------------------------------------------------------------
@@ -13,51 +16,40 @@ extends Reference
 
 #--- private variables - order: export > normal var > onready -------------------------------------
 
+var _previous_focus: Control = null
+onready var _blocker = $Blocker
+
 ### -----------------------------------------------------------------------------------------------
 
 
 ### Built in Engine Methods -----------------------------------------------------------------------
+
+func _ready():
+	_blocker.hide()
+	set_process_input(false)
+
+
+func _input(event: InputEvent) -> void:
+	get_tree().set_input_as_handled()
 
 ### -----------------------------------------------------------------------------------------------
 
 
 ### Public Methods --------------------------------------------------------------------------------
 
-static func list_dir(path, omit_first_print: = false) -> void:
-	if not omit_first_print:
-		print("\nPRINTING FOLDER: %s"%[path])
-	var dir = Directory.new()
-	dir.open(path)
-	dir.list_dir_begin(true, true)
-	var next = dir.get_next()
-	while next != "":
-		print(next)
-		if dir.current_is_dir():
-			list_dir("%s/%s"%[path, next], true)
-		next = dir.get_next()
+func activate() -> void:
+	set_process_input(true)
+	_previous_focus = _blocker.get_focus_owner()
+	_blocker.show()
+	_blocker.grab_focus()
 
 
-static func load_from_folder_to_dict(
-		folder_path: String, target_dict: Dictionary, type_hint: String = ""
-	) -> void:
-	var dir: = Directory.new()
-	dir.open(folder_path)
-	dir.list_dir_begin(true)
-	var next: = dir.get_next()
-	while next != "":
-		if not dir.current_is_dir():
-			var item = load(folder_path + next)
-			if type_hint != "" and not item.is_class(type_hint):
-				next = dir.get_next()
-				continue
-			
-			var key: = next.replace(".%s"%[item.resource_path.get_extension()], "")
-			target_dict[key] = item
-		else:
-			load_from_folder_to_dict(folder_path, target_dict, type_hint)
-		
-		next = dir.get_next()
-	dir.list_dir_end()
+func deactivate() -> void:
+	_blocker.hide()
+	set_process_input(false)
+	if _previous_focus != null and is_instance_valid(_previous_focus):
+		_previous_focus.grab_focus()
+		_previous_focus = null
 
 ### -----------------------------------------------------------------------------------------------
 

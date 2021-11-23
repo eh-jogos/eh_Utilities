@@ -20,6 +20,8 @@ var _incoming_connections: Array
 
 onready var _state_machine: = _get_state_machine(self)
 
+onready var _parent = get_parent()
+
 ### -----------------------------------------------------------------------------------------------
 
 

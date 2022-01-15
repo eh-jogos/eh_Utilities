@@ -153,6 +153,12 @@ static func get_enum_hint_for(
 	var enum_hint: = string_array.join(",")
 	return enum_hint
 
+
+static func add_line_break_if_not_empty(msg: String) -> String:
+	if msg != "":
+		msg += "\n"
+	return msg
+
 ### -----------------------------------------------------------------------------------------------
 
 

@@ -72,7 +72,7 @@ func _init(p_origin: Node, properties: Array, category: String = "") -> void:
 	node_origin = p_origin
 	_category_name = category
 	for property in properties:
-		if property is Array:
+		if property is Dictionary:
 			_build_group_of_properties(property)
 		else:
 			var key: String = "_%s"%[property]
@@ -111,37 +111,34 @@ func _get_property_list() -> Array:
 func has_property(p_property: String) -> bool:
 	return custom_properties.has(p_property)
 
-
-func set_source_properties() -> void:
-	for meta_property in custom_properties:
-		var original_property = custom_properties[meta_property]
-		_set(meta_property, _get(meta_property))
-
 ### -----------------------------------------------------------------------------------------------
 
 
 ### Private Methods -------------------------------------------------------------------------------
 
-func _build_group_of_properties(group: Array) -> void:
-	var group_name: String = ""
-	for index in group.size():
-		var property: String = group[index] as String
-		if property == null:
-			push_error("All values inside the group array must be strings")
+func _build_group_of_properties(group: Dictionary) -> void:
+	for key in group:
+		var group_name: String = key as String
+		if not group_name:
+			push_error("Every key from a group dictionary must be a string for the group hint")
 			return
 		
-		if index == 0:
-			group_name = _get_group_name_from(property)
-			custom_properties[group_name] = {}
+		var group_array: Array = group[group_name] as Array
+		if not group_array:
+			var msg ="The value for a group key must be an Array os Strings with the "
+			msg += "property names you want to show in the editor."
+			push_error(msg)
+			return
 		
-		var key: String = "_%s"%[property]
-		custom_properties[group_name][key] = property
-
-
-func _get_group_name_from(property: String) -> String:
-	property = property.trim_prefix("_")
-	var parts: = property.split("_")
-	return parts[0]
+		custom_properties[group_name] = {}
+		for index in group_array.size():
+			var property: String = group_array[index] as String
+			if property == null:
+				push_error("All values inside the group array must be strings")
+				return
+			
+			var editor_property_name: String = "_%s"%[property]
+			custom_properties[group_name][editor_property_name] = property
 
 
 func _get_original_property(property: String) -> String:

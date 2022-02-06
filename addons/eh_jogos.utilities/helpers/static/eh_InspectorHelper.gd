@@ -3,7 +3,7 @@
 # anywhere.
 # 
 # Some tips:
-# - If the properties are not appearing in the editor, make sure the script has teh `tool` keyword
+# - If the properties are not appearing in the editor, make sure the script has the `tool` keyword
 # - Be careful that the script isn't doing anything you don't want to happen in the editor in 
 # default engine functions like `_ready()` and the process and input functions. Checking for 
 # `Engine.editor_hint` might help with that.
@@ -98,39 +98,70 @@ static func get_property_dict_for(
 			p_name: String, 
 			p_type: int, 
 			p_usage: = PROPERTY_USAGE_DEFAULT, 
-			p_hint: = -1, 
+			p_hint: = PROPERTY_HINT_NONE,
 			p_hint_string: = ""
 	) -> Dictionary:
 	return {
 		name = p_name,
 		type = p_type,
 		usage = p_usage,
-		hint = _get_hint_for(p_type) if p_hint == -1 else p_hint,
-		hint_string = _get_hint_string_for(p_type) if p_hint_string == "" else p_hint_string
+		hint = p_hint,
+		hint_string = p_hint_string
 	}
+
+
+static func get_int_range_property_dict_for(
+		p_name: String, p_range_hint: String, p_usage: = PROPERTY_USAGE_DEFAULT
+) -> Dictionary:
+	return get_property_dict_for(
+			p_name, TYPE_INT, p_usage, PROPERTY_HINT_RANGE, p_range_hint
+	)
+
+
+static func get_float_range_property_dict_for(
+		p_name: String, p_range_hint: String, p_usage: = PROPERTY_USAGE_DEFAULT
+) -> Dictionary:
+	return get_property_dict_for(
+			p_name, TYPE_REAL, p_usage, PROPERTY_HINT_RANGE, p_range_hint
+	)
+
+
+static func get_int_enum_property_dict_for(
+		p_name: String, p_enum_hint: String, p_usage: = PROPERTY_USAGE_DEFAULT
+) -> Dictionary:
+	return get_property_dict_for(
+			p_name, TYPE_INT, p_usage, PROPERTY_HINT_ENUM, p_enum_hint
+	)
+
+
+static func get_string_enum_property_dict_for(
+		p_name: String, p_enum_hint: String, p_usage: = PROPERTY_USAGE_DEFAULT
+) -> Dictionary:
+	return get_property_dict_for(
+			p_name, TYPE_STRING, p_usage, PROPERTY_HINT_ENUM, p_enum_hint
+	)
+
+
+static func get_enum_hint_for(
+		string_array: PoolStringArray, 
+		should_capitalize: = true
+) -> String:
+	for index in string_array.size():
+		var string: String = string_array[index]
+		string_array[index] = string.capitalize() if should_capitalize else string
+	
+	var enum_hint: = string_array.join(",")
+	return enum_hint
+
+
+static func add_line_break_if_not_empty(msg: String) -> String:
+	if msg != "":
+		msg += "\n"
+	return msg
 
 ### -----------------------------------------------------------------------------------------------
 
 
 ### Private Methods -------------------------------------------------------------------------------
-
-static func _get_hint_for(p_type: int) -> int:
-	var hint: int = PROPERTY_HINT_NONE
-	
-	match p_type:
-		TYPE_BOOL, TYPE_NODE_PATH, TYPE_VECTOR2:
-			hint = PROPERTY_HINT_NONE
-	
-	return hint
-
-
-static func _get_hint_string_for(p_type: int) -> String:
-	var hint_string: = ""
-	
-	match p_type:
-		TYPE_BOOL, TYPE_NODE_PATH:
-			hint_string = ""
-	
-	return hint_string
 
 ### -----------------------------------------------------------------------------------------------

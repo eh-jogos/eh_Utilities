@@ -20,6 +20,9 @@ extends eh_TransformTween
 
 #--- private variables - order: export > normal var > onready -------------------------------------
 
+var _quat_from: Quat
+var _quat_to: Quat
+
 ### -----------------------------------------------------------------------------------------------
 
 
@@ -32,6 +35,12 @@ func _init() -> void:
 
 
 ### Public Methods --------------------------------------------------------------------------------
+
+
+func _setup_tween_variables(p_to: Transform) -> void:
+	._setup_tween_variables(p_to)
+	_quat_from = _from.basis.get_rotation_quat()
+	_quat_to = _to.basis.get_rotation_quat()
 
 ### -----------------------------------------------------------------------------------------------
 

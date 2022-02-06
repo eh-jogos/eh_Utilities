@@ -13,6 +13,8 @@ extends Position2D
 #--- public variables - order: export > normal var > onready --------------------------------------
 
 var tile_position: Vector2 = Vector2.ZERO setget _set_tile_position
+var global_tile_position: Vector2 = Vector2.ZERO \
+		setget _set_global_tile_position, _get_global_tile_position
 
 #--- private variables - order: export > normal var > onready -------------------------------------
 
@@ -26,9 +28,14 @@ var _reference_tile_size: Vector2 = Vector2(16, 16) setget _set_reference_tile_s
 
 ### Built in Engine Methods -----------------------------------------------------------------------
 
+func _init() -> void:
+	set_process(false)
+
+
 func _ready() -> void:
-	if not Engine.editor_hint:
-		set_process(false)
+	_update_reference_position()
+	if Engine.editor_hint:
+		set_process(true)
 
 
 func _process(_delta: float) -> void:
@@ -46,17 +53,44 @@ func _process(_delta: float) -> void:
 
 ### Private Methods -------------------------------------------------------------------------------
 
+func _update_reference_position() -> void:
+	_reference_position = get_parent().global_position if get_parent() is Node2D else Vector2.ZERO
+
+
 func _set_tile_position(value: Vector2) -> void:
 	if tile_position != value:
 		tile_position = value
-		global_position = tile_position * _reference_tile_size
+		
+		if not is_inside_tree():
+			yield(self, "ready")
+		
+		position = tile_position * _reference_tile_size
 		property_list_changed_notify()
+
+
+func _set_global_tile_position(value: Vector2) -> void:
+	if global_tile_position != value:
+		global_tile_position = value
+		
+		if not is_inside_tree():
+			yield(self, "ready")
+		
+		global_position = global_tile_position * _reference_tile_size
+		property_list_changed_notify()
+
+
+func _get_global_tile_position() -> Vector2:
+	return global_position / _reference_tile_size
 
 
 func _set_use_tilemap(value: bool) -> void:
 	_use_tilemap = value
 	
-	if _path_tilemap == NodePath(""):
+	if not is_inside_tree():
+			yield(self, "ready")
+	
+	if _use_tilemap and _path_tilemap == NodePath(""):
+		_update_reference_position()
 		_reference_tile_size = Vector2.ZERO
 	
 	property_list_changed_notify()
@@ -76,7 +110,7 @@ func _set_path_tilemap(value: NodePath) -> void:
 		_reference_tile_size = tilemap.cell_size
 	else:
 		_path_tilemap = NodePath("")
-		_reference_position = Vector2.ZERO
+		_update_reference_position()
 		_reference_tile_size = Vector2.ZERO
 	
 	property_list_changed_notify()
@@ -102,6 +136,8 @@ func _get_property_list() -> Array:
 	var dict: = {}
 	if _reference_tile_size.x != 0 and _reference_tile_size.y != 0:
 		dict = eh_InspectorHelper.get_property_dict_for("tile_position", TYPE_VECTOR2)
+		properties.append(dict)
+		dict = eh_InspectorHelper.get_property_dict_for("global_tile_position", TYPE_VECTOR2)
 		properties.append(dict)
 	
 	dict = eh_InspectorHelper.get_category_dict("Configuration")

@@ -1,6 +1,6 @@
 # Based on GDQuest StateMachine but with some modifications in case it's extended to a tool script.
 # Which I sometimes do to add some debugging shared variables
-class_name StateMachine
+class_name eh_StateMachine
 extends Node
 
 ### Member Variables and Dependencies -------------------------------------------------------------
@@ -20,7 +20,7 @@ export var initial_state: NodePath = NodePath("")
 
 var is_active: bool = true setget _set_is_active
 
-var state: State = null
+var state: eh_State = null
 
 #--- private variables - order: export > normal var > onready -------------------------------------
 
@@ -55,12 +55,12 @@ func _physics_process(delta: float) -> void:
 	state.physics_process(delta)
 
 
-func is_class(p_class: String) -> bool:
-	return p_class == CLASS_STRING or .is_class(p_class)
-
-
 func get_class() -> String:
-	return CLASS_STRING
+	return "StateMachine"
+
+
+func is_class(p_class: String) -> bool:
+	return p_class == get_class() or .is_class(p_class)
 
 ### -----------------------------------------------------------------------------------------------
 
@@ -89,7 +89,7 @@ func _set_is_active(value: bool) -> void:
 	set_physics_process(is_active)
 
 
-func _set_state(value: State) -> void:
+func _set_state(value: eh_State) -> void:
 	state = value
 	_state_name = state.name
 

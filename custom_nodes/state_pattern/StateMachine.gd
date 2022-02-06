@@ -20,7 +20,7 @@ export var initial_state: NodePath = NodePath("")
 
 var is_active: bool = true setget _set_is_active
 
-var state: State = null
+var state: eh_State = null
 
 #--- private variables - order: export > normal var > onready -------------------------------------
 
@@ -89,7 +89,7 @@ func _set_is_active(value: bool) -> void:
 	set_physics_process(is_active)
 
 
-func _set_state(value: State) -> void:
+func _set_state(value: eh_State) -> void:
 	state = value
 	_state_name = state.name
 

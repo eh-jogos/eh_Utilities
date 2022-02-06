@@ -9,9 +9,8 @@ corner_radius_top_right = 20
 corner_radius_bottom_right = 20
 corner_radius_bottom_left = 20
 
-[node name="DebugPrintPanel" type="PanelContainer" groups=[
-"debug_print",
-]]
+[node name="DebugPrintPanel" type="PanelContainer" groups=["debug_print"]]
+visible = false
 anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0

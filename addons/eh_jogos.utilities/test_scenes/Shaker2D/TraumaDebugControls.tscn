@@ -1,13 +1,7 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=3 format=2]
 
 [ext_resource path="res://addons/eh_jogos.utilities/test_scenes/Shaker2D/DebugControls.gd" type="Script" id=1]
 [ext_resource path="res://addons/eh_jogos.utilities/test_scenes/Shaker2D/TimeScale.gd" type="Script" id=2]
-[ext_resource path="res://Fonts/Orbitron/Orbitron-Medium.ttf" type="DynamicFontData" id=3]
-
-
-[sub_resource type="DynamicFont" id=1]
-size = 24
-font_data = ExtResource( 3 )
 
 [node name="TraumaDebugControls" type="VBoxContainer"]
 anchor_right = 1.0
@@ -21,21 +15,21 @@ __meta__ = {
 }
 
 [node name="TimeScaleLine" type="HBoxContainer" parent="."]
-margin_right = 870.0
-margin_bottom = 24.0
+margin_right = 1510.0
+margin_bottom = 16.0
 
 [node name="TimeScale" type="Label" parent="TimeScaleLine"]
+margin_top = 1.0
 margin_right = 250.0
-margin_bottom = 24.0
+margin_bottom = 15.0
 rect_min_size = Vector2( 250, 0 )
-custom_fonts/font = SubResource( 1 )
 text = "time scale: 0.00 "
 script = ExtResource( 2 )
 
 [node name="TimeScaleSlider" type="HSlider" parent="TimeScaleLine"]
 margin_left = 254.0
-margin_right = 870.0
-margin_bottom = 24.0
+margin_right = 1510.0
+margin_bottom = 16.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 max_value = 5.0
@@ -43,35 +37,33 @@ step = 0.01
 value = 1.0
 
 [node name="TraumaCenter" type="HBoxContainer" parent="."]
-margin_top = 28.0
-margin_right = 870.0
-margin_bottom = 58.0
+margin_top = 20.0
+margin_right = 1510.0
+margin_bottom = 40.0
 custom_constants/separation = 15
 
 [node name="TraumaSmall" type="Button" parent="TraumaCenter"]
-margin_right = 280.0
-margin_bottom = 30.0
+margin_right = 493.0
+margin_bottom = 20.0
 size_flags_horizontal = 3
-custom_fonts/font = SubResource( 1 )
 text = "add 0.3 trauma"
 
 [node name="TraumaMedium" type="Button" parent="TraumaCenter"]
-margin_left = 295.0
-margin_right = 575.0
-margin_bottom = 30.0
+margin_left = 508.0
+margin_right = 1001.0
+margin_bottom = 20.0
 size_flags_horizontal = 3
-custom_fonts/font = SubResource( 1 )
 text = "add 0.6 trauma"
 
 [node name="TraumaBig" type="Button" parent="TraumaCenter"]
-margin_left = 590.0
-margin_right = 870.0
-margin_bottom = 30.0
+margin_left = 1016.0
+margin_right = 1510.0
+margin_bottom = 20.0
 size_flags_horizontal = 3
-custom_fonts/font = SubResource( 1 )
 text = "add 1.0 trauma"
-[connection signal="value_changed" from="TimeScaleLine/TimeScaleSlider" to="TimeScaleLine/TimeScale" method="_on_TimeScaleSlider_value_changed"]
+
 [connection signal="value_changed" from="TimeScaleLine/TimeScaleSlider" to="." method="_on_TimeScaleSlider_value_changed"]
+[connection signal="value_changed" from="TimeScaleLine/TimeScaleSlider" to="TimeScaleLine/TimeScale" method="_on_TimeScaleSlider_value_changed"]
 [connection signal="pressed" from="TraumaCenter/TraumaSmall" to="." method="_on_TraumaSmall_pressed"]
 [connection signal="pressed" from="TraumaCenter/TraumaMedium" to="." method="_on_TraumaMedium_pressed"]
 [connection signal="pressed" from="TraumaCenter/TraumaBig" to="." method="_on_TraumaBig_pressed"]

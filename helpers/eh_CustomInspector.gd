@@ -126,7 +126,7 @@ func _build_group_of_properties(group: Dictionary) -> void:
 		var group_array: Array = group[group_name] as Array
 		if not group_array:
 			var msg ="The value for a group key must be an Array os Strings with the "
-			msg += "property names you want to show in teh editor."
+			msg += "property names you want to show in the editor."
 			push_error(msg)
 			return
 		

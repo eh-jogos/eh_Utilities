@@ -3,7 +3,7 @@
 # anywhere.
 # 
 # Some tips:
-# - If the properties are not appearing in the editor, make sure the script has teh `tool` keyword
+# - If the properties are not appearing in the editor, make sure the script has the `tool` keyword
 # - Be careful that the script isn't doing anything you don't want to happen in the editor in 
 # default engine functions like `_ready()` and the process and input functions. Checking for 
 # `Engine.editor_hint` might help with that.

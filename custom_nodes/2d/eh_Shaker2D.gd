@@ -38,20 +38,22 @@ export var decay: float = 0.8
 # Maximum hor/ver shake in pixels.
 export var max_offset: Vector2 = Vector2(100, 75)  
 # Maximum rotation in degrees.
-export(float, 0.0, 360.0, 1) var max_roll: float = 0.1  
-# For smooth randomness in the shake movement.
-export var noise: OpenSimplexNoise = OpenSimplexNoise.new() as OpenSimplexNoise
+export(float, 0.0, 6.283185, 0.01) var max_roll: float = 0.1  
 # Trauma exponent.
 export(int, 2, 3, 1) var trauma_power: int = 2
 
 #--- private variables - order: export > normal var > onready -------------------------------------
+
+# To visualize the noise properties we are using
+export var _noise_texture: NoiseTexture = null
+# For smooth randomness in the shake movement.
+var _noise: OpenSimplexNoise = null
 
 # Current shake strength. Should be a value between 0 and 1.
 var _trauma: float = 0.0
 # Predominant direction of shake. 
 var _direction: Vector2 = Vector2.ZERO
 
-var _timer: Timer = Timer.new()
 var _time: float = 0.0
 
 var base_offset: Vector2 = Vector2.ZERO
@@ -61,7 +63,7 @@ var base_rotation: float = 0
 var _test_trauma: float = 0.0 setget _set_test_trauma
 var _test_direction: Vector2 = Vector2.ZERO setget _set_test_direction
 
-onready var _target: Node2D = get_node(shake_target)
+onready var _target: CanvasItem = get_node(shake_target)
 
 ### -----------------------------------------------------------------------------------------------
 
@@ -70,14 +72,8 @@ onready var _target: Node2D = get_node(shake_target)
 
 func _ready():
 	randomize()
-	noise.seed = randi()
-	
+	_handle_noise()
 	_update_base_values()
-	
-	add_child(_timer, true)
-	_timer.one_shot = true
-	_timer.connect("timeout", self, "_on_timer_timeout")
-	_timer.start(TIME_UNIT)
 
 
 func _process(delta):
@@ -120,7 +116,7 @@ func _get_property_list() -> Array:
 
 ### Public Methods --------------------------------------------------------------------------------
 
-func add_trauma(amount, direction: = Vector2.ZERO):
+func add_trauma(amount: float, direction: = Vector2.ZERO):
 	if _trauma == 0:
 		_update_base_values()
 	
@@ -165,29 +161,51 @@ func _test_add_trauma() -> void:
 		push_warning("This variable is only for tests in the editor, it doesn't work in runtime.")
 
 
+func _handle_noise() -> void:
+	if _noise_texture == null:
+		_noise = OpenSimplexNoise.new()
+		_noise.seed = randi()
+		_noise.period = 4
+		_noise.octaves = 2
+		_noise_texture = NoiseTexture.new()
+		_noise_texture.noise = _noise
+	else:
+		_noise = _noise_texture.noise
+		_noise.seed = randi()
+
+
 func _update_base_values() -> void:
-	if _target.position != base_offset:
-		base_offset = _target.position
-	
-	if _target.rotation != base_rotation:
-		base_rotation = _target.rotation
+	if _target is Node2D:
+		if _target.position != base_offset:
+			base_offset = _target.position
+		
+		if _target.rotation != base_rotation:
+			base_rotation = _target.rotation
+	elif _target is Control:
+		if _target.rect_position != base_offset:
+			base_offset = _target.rect_position
+		
+		if _target.rect_rotation != base_rotation:
+			base_rotation = _target.rect_rotation
 
 
 func _shake():
 	var shake_amount = pow(_trauma, trauma_power)
-	var rotation_factor = deg2rad(max_roll) * shake_amount * noise.get_noise_2d(noise.seed, _time)
-	var translation_x_factor = \
-			max_offset.x * shake_amount * (_direction.x + noise.get_noise_2d(noise.seed*2, _time))
-	var translation_y_factor = \
-			max_offset.y * shake_amount * (_direction.y + noise.get_noise_2d(noise.seed*3, _time))
-	
-	_target.rotation = base_rotation + rotation_factor
-	_target.position.x = base_offset.x + translation_x_factor
-	_target.position.y = base_offset.y + translation_y_factor
-
-
-func _on_timer_timeout() -> void:
 	_time += 1 * Engine.time_scale
-	_timer.start(TIME_UNIT)
+	
+	var rotation_factor = max_roll * shake_amount * _noise.get_noise_2d(_noise.seed, _time)
+	var translation_x_factor = \
+			max_offset.x * shake_amount * (_direction.x + _noise.get_noise_2d(_noise.seed*2, _time))
+	var translation_y_factor = \
+			max_offset.y * shake_amount * (_direction.y + _noise.get_noise_2d(_noise.seed*3, _time))
+	
+	if _target is Node2D:
+		_target.rotation = base_rotation + rotation_factor
+		_target.position.x = base_offset.x + translation_x_factor
+		_target.position.y = base_offset.y + translation_y_factor
+	elif _target is Control:
+		_target.rect_rotation = base_rotation + rotation_factor
+		_target.rect_position.x = base_offset.x + translation_x_factor
+		_target.rect_position.y = base_offset.y + translation_y_factor
 
 ### -----------------------------------------------------------------------------------------------

@@ -50,7 +50,7 @@ script = ExtResource( 4 )
 script = ExtResource( 3 )
 max_offset = Vector2( 100, 100 )
 _noise_texture = SubResource( 5 )
-_test_trauma = 0.09
+_test_trauma = 0.0
 _test_direction = Vector2( 0, 0 )
 
 [node name="Sprite" type="Sprite" parent="."]

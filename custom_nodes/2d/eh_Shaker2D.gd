@@ -171,7 +171,6 @@ func _handle_noise() -> void:
 		_noise_texture.noise = _noise
 	else:
 		_noise = _noise_texture.noise
-		_noise.seed = randi()
 
 
 func _update_base_values() -> void:

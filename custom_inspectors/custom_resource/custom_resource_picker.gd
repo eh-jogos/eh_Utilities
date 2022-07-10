@@ -40,7 +40,6 @@ func set_create_options(menu_node: Object) -> void:
 
 func handle_menu_selected(id: int):
 	var has_handled := false
-	print("id: %s"%[id])
 	
 	if _valid_ids.has(id):
 		has_handled = true

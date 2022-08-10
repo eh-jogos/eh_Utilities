@@ -28,9 +28,10 @@
 #
 #const CUSTOM_PROPERTIES = {
 ##	"": {
+##		name = "",
 ##		backing_field = "",
 ##		type = TYPE_NIL,
-##		usage = PROPERTY_USAGE_DEFAULT,
+##		usage = PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_SCRIPT_VARIABLE,
 ##		hint = PROPERTY_HINT_NONE,
 ##		hint_string = "",
 ##	},

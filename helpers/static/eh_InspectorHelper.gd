@@ -30,6 +30,8 @@
 ##	"": {
 ##		name = "",
 ##		backing_field = "",
+##		get_method = "",
+##		set_method = "",
 ##		type = TYPE_NIL,
 ##		usage = PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_SCRIPT_VARIABLE,
 ##		hint = PROPERTY_HINT_NONE,
@@ -57,8 +59,11 @@
 #func _get(property: String):
 #	var value
 #	
-#	if property in CUSTOM_PROPERTIES and CUSTOM_PROPERTIES[property].has("backing_field"):
-#		value = get(CUSTOM_PROPERTIES[property]["backing_field"])
+#	if property in CUSTOM_PROPERTIES: 
+#		if CUSTOM_PROPERTIES[property].has("backing_field"):
+#			value = get(CUSTOM_PROPERTIES[property]["backing_field"])
+#		elif CUSTOM_PROPERTIES[property].has("get_method"):
+#			value = call(CUSTOM_PROPERTIES[property]["get_method"])
 #	
 #	return value
 #
@@ -66,9 +71,13 @@
 #func _set(property: String, value) -> bool:
 #	var has_handled: = false
 #	
-#	if property in CUSTOM_PROPERTIES and CUSTOM_PROPERTIES[property].has("backing_field"):
-#		set(CUSTOM_PROPERTIES[property]["backing_field"], value)
-#		has_handled = true
+#	if property in CUSTOM_PROPERTIES :
+#		if CUSTOM_PROPERTIES[property].has("backing_field"):
+#			set(CUSTOM_PROPERTIES[property]["backing_field"], value)
+#			has_handled = true
+#		elif CUSTOM_PROPERTIES[property].has("set_method"):
+#			call(CUSTOM_PROPERTIES[property]["set_method"], value)
+#			has_handled = true
 #	
 #	return has_handled
 #

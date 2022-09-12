@@ -7,7 +7,6 @@ extends Resource
 
 signal loading_progressed(progress_value)
 signal loading_finished(loaded_resource)
-signal loading_thread_aborted
 signal loading_safely_aborted
 
 #--- enums ----------------------------------------------------------------------------------------
@@ -35,11 +34,7 @@ var _has_finished_loading := false
 ### Built in Engine Methods -----------------------------------------------------------------------
 
 func _init() -> void:
-	eh_EditorHelpers.connect_between(
-			self, "loading_finished", 
-			self, "_on_loading_finished", 
-			[], CONNECT_DEFERRED
-	)
+	pass
 
 ### -----------------------------------------------------------------------------------------------
 
@@ -86,6 +81,10 @@ func has_finished() -> bool:
 	return _has_finished_loading
 
 
+func is_loading() -> bool:
+	return _loading_thread != null
+
+
 func start_loading(p_path: String = "") -> void:
 	if _is_aborting_load:
 		yield(self, "loading_safely_aborted")
@@ -125,12 +124,10 @@ func clear_loaded_resource() -> void:
 
 
 func abort_loading() -> void:
-	eh_EditorHelpers.connect_between(
-		self, "loading_aborted", self, "loading_thread_aborted", [], CONNECT_DEFERRED
-	)
-	_mutex.lock()
-	_is_aborting_load = true
-	_mutex.unlock()
+	if is_loading():
+		_mutex.lock()
+		_is_aborting_load = true
+		_mutex.unlock()
 
 ### -----------------------------------------------------------------------------------------------
 
@@ -161,22 +158,24 @@ func _load_on_thread(p_path) -> void:
 	if status == ERR_FILE_EOF:
 		_loaded_resource = _loader.get_resource()
 		emit_signal("loading_progressed", 1.0)
-		emit_signal("loading_finished", _loaded_resource)
+		call_deferred("_on_thread_finished")
 	elif status == ERR_PRINTER_ON_FIRE:
-		emit_signal("loading_thread_aborted")
+		call_deferred("_on_loading_thread_aborted")
 	else:
 		push_error("Something went wrong when trying to load %s. Error Code: %s"%[
 				p_path, status
 		])
-		_on_loading_finished(null)
+		call_deferred("_on_thread_finished", true)
 
 
-func _on_loading_finished(_resource: Resource) -> void:
+func _on_thread_finished(has_failed := false) -> void:
 	_path_to_load = ""
 	_loading_thread.wait_to_finish()
 	_loading_thread = null
 	_loader = null
 	_has_finished_loading = true
+	if not has_failed:
+		emit_signal("loading_finished", _loaded_resource)
 
 
 func _on_loading_thread_aborted() -> void:
@@ -187,5 +186,6 @@ func _on_loading_thread_aborted() -> void:
 	_loader = null
 	_is_aborting_load = false
 	_has_finished_loading = false
+	emit_signal("loading_safely_aborted")
 
 ### -----------------------------------------------------------------------------------------------

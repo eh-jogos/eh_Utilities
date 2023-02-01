@@ -15,8 +15,9 @@ extends EditorPlugin
 
 #--- constants ------------------------------------------------------------------------------------
 
-const SETTING_LOGGING_ENABLED = "eh_utilities/logging_enabled"
+const PATH_CUSTOM_INSPECTORS = "res://addons/eh_jogos.utilities/custom_inspectors/"
 
+const SETTING_LOGGING_ENABLED = "eh_utilities/logging_enabled"
 const SETTINGS = {
 	SETTING_LOGGING_ENABLED: 
 	{
@@ -27,9 +28,13 @@ const SETTINGS = {
 	},
 }
 
+
+
 #--- public variables - order: export > normal var > onready --------------------------------------
 
 #--- private variables - order: export > normal var > onready -------------------------------------
+
+var _loaded_inspectors := {}
 
 ### -----------------------------------------------------------------------------------------------
 
@@ -37,14 +42,31 @@ const SETTINGS = {
 ### Built in Engine Methods -----------------------------------------------------------------------
 
 func _enter_tree() -> void:
-	pass
+	_add_custom_inspectors()
 
 
 func _exit_tree() -> void:
-	pass
+	_remove_custom_inspectors()
 
 
 func enable_plugin() -> void:
+	_add_plugin_settings()
+
+
+func disable_plugin() -> void:
+	_remove_plugin_settings()
+
+### -----------------------------------------------------------------------------------------------
+
+
+### Public Methods --------------------------------------------------------------------------------
+
+### -----------------------------------------------------------------------------------------------
+
+
+### Private Methods -------------------------------------------------------------------------------
+
+func _add_plugin_settings() -> void:
 	for setting in SETTINGS:
 		if not ProjectSettings.has_setting(setting):
 			var dict: Dictionary = SETTINGS[setting]
@@ -58,20 +80,49 @@ func enable_plugin() -> void:
 			ProjectSettings.save()
 
 
-func disable_plugin() -> void:
+func _remove_plugin_settings() -> void:
 	for setting in SETTINGS:
 		if ProjectSettings.has_setting(setting):
 			ProjectSettings.set_setting(setting, null)
 			ProjectSettings.save()
 
-### -----------------------------------------------------------------------------------------------
+
+func _add_custom_inspectors() -> void:
+	var dir := Directory.new()
+	var error := dir.open(PATH_CUSTOM_INSPECTORS)
+	
+	if error == OK:
+		dir.list_dir_begin()
+		var folder_name := dir.get_next()
+		while not folder_name.empty():
+			if dir.current_is_dir(): 
+				_load_custom_inspector_from(folder_name)
+			folder_name = dir.get_next()
+	else:
+		var error_msg = "Error code: %s | Something went wrong trying to open %s"%[
+			error, PATH_CUSTOM_INSPECTORS
+		]
+		push_error(error_msg)
 
 
-### Public Methods --------------------------------------------------------------------------------
+func _load_custom_inspector_from(folder: String) -> void:
+	var PATH_SCRIPT = "inspector_plugin.gd"
+	var full_path := PATH_CUSTOM_INSPECTORS.plus_file(folder).plus_file(PATH_SCRIPT)
+	if ResourceLoader.exists(full_path):
+		var custom_inspector := load(full_path).new() as EditorInspectorPlugin
+		add_inspector_plugin(custom_inspector)
+		
+		if "undo_redo" in custom_inspector:
+			custom_inspector.undo_redo = get_undo_redo()
+		
+		if "parent_plugin" in custom_inspector:
+			custom_inspector.parent_plugin = self
+		
+		_loaded_inspectors[folder] = custom_inspector
 
-### -----------------------------------------------------------------------------------------------
 
-
-### Private Methods -------------------------------------------------------------------------------
+func _remove_custom_inspectors() -> void:
+	for inspector in _loaded_inspectors.values():
+		remove_inspector_plugin(inspector)
 
 ### -----------------------------------------------------------------------------------------------

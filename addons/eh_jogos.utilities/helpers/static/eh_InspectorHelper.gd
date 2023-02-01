@@ -22,34 +22,64 @@
 #
 # Example snippet to copy-paste:
 #
-###################################################################################################
-# Custom Inspector ################################################################################
-###################################################################################################
+####################################################################################################
+## Editor Methods ##################################################################################
+####################################################################################################
 #
-#### Editor Methods --------------------------------------------------------------------------------
+#const CUSTOM_PROPERTIES = {
+##	"": {
+##		name = "",
+##		backing_field = "",
+##		get_method = "",
+##		set_method = "",
+##		type = TYPE_NIL,
+##		usage = PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_SCRIPT_VARIABLE,
+##		hint = PROPERTY_HINT_NONE,
+##		hint_string = "",
+##	},
+#}
+#
+#### Custom Inspector built in functions -----------------------------------------------------------
 #
 #func _get_property_list() -> Array:
 #	var properties: = []
-#
+#	
+#	for key in CUSTOM_PROPERTIES:
+#		var add_property := true
+#		var dict: Dictionary = CUSTOM_PROPERTIES[key]
+#		if not dict.has("name"):
+#			dict.name = key
+#			
+#		if add_property:
+#			properties.append(dict)
+#	
 #	return properties
 #
 #
 #func _get(property: String):
-#	var to_return = null
-#
-#	return to_return
+#	var value
+#	
+#	if property in CUSTOM_PROPERTIES: 
+#		if CUSTOM_PROPERTIES[property].has("backing_field"):
+#			value = get(CUSTOM_PROPERTIES[property]["backing_field"])
+#		elif CUSTOM_PROPERTIES[property].has("get_method"):
+#			value = call(CUSTOM_PROPERTIES[property]["get_method"])
+#	
+#	return value
 #
 #
 #func _set(property: String, value) -> bool:
 #	var has_handled: = false
-#
+#	
+#	if property in CUSTOM_PROPERTIES :
+#		if CUSTOM_PROPERTIES[property].has("backing_field"):
+#			set(CUSTOM_PROPERTIES[property]["backing_field"], value)
+#			has_handled = true
+#		elif CUSTOM_PROPERTIES[property].has("set_method"):
+#			call(CUSTOM_PROPERTIES[property]["set_method"], value)
+#			has_handled = true
+#	
 #	return has_handled
-#
-#
-#func _get_configuration_warning() -> String:
-#	var msg: = ""
-#
-#	return msg
 #
 #### -----------------------------------------------------------------------------------------------
 
@@ -76,71 +106,6 @@ extends Reference
 
 
 ### Public Methods --------------------------------------------------------------------------------
-
-static func get_category_dict(category_name: String) -> Dictionary:
-	return {
-		name = category_name,
-		type = TYPE_NIL,
-		usage = PROPERTY_USAGE_CATEGORY,
-	}
-
-
-static func get_group_dict(group_name: String, group_prefix: String) -> Dictionary:
-	return {
-			name = group_name,
-			type = TYPE_NIL,
-			usage = PROPERTY_USAGE_GROUP,
-			hint_string = group_prefix,
-	}
-
-
-static func get_property_dict_for(
-			p_name: String, 
-			p_type: int, 
-			p_usage: = PROPERTY_USAGE_DEFAULT, 
-			p_hint: = PROPERTY_HINT_NONE,
-			p_hint_string: = ""
-	) -> Dictionary:
-	return {
-		name = p_name,
-		type = p_type,
-		usage = p_usage,
-		hint = p_hint,
-		hint_string = p_hint_string
-	}
-
-
-static func get_int_range_property_dict_for(
-		p_name: String, p_range_hint: String, p_usage: = PROPERTY_USAGE_DEFAULT
-) -> Dictionary:
-	return get_property_dict_for(
-			p_name, TYPE_INT, p_usage, PROPERTY_HINT_RANGE, p_range_hint
-	)
-
-
-static func get_float_range_property_dict_for(
-		p_name: String, p_range_hint: String, p_usage: = PROPERTY_USAGE_DEFAULT
-) -> Dictionary:
-	return get_property_dict_for(
-			p_name, TYPE_REAL, p_usage, PROPERTY_HINT_RANGE, p_range_hint
-	)
-
-
-static func get_int_enum_property_dict_for(
-		p_name: String, p_enum_hint: String, p_usage: = PROPERTY_USAGE_DEFAULT
-) -> Dictionary:
-	return get_property_dict_for(
-			p_name, TYPE_INT, p_usage, PROPERTY_HINT_ENUM, p_enum_hint
-	)
-
-
-static func get_string_enum_property_dict_for(
-		p_name: String, p_enum_hint: String, p_usage: = PROPERTY_USAGE_DEFAULT
-) -> Dictionary:
-	return get_property_dict_for(
-			p_name, TYPE_STRING, p_usage, PROPERTY_HINT_ENUM, p_enum_hint
-	)
-
 
 static func get_enum_hint_for(
 		string_array: PoolStringArray, 

@@ -12,9 +12,9 @@ extends VBoxContainer
 
 #--- private variables - order: export > normal var > onready -------------------------------------
 
-export var _path_shaker: NodePath = NodePath("")
+@export var _path_shaker: NodePath = NodePath("")
 
-onready var _shaker: Node = get_node(_path_shaker)
+@onready var _shaker: Node = get_node(_path_shaker)
 
 ### -----------------------------------------------------------------------------------------------
 

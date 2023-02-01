@@ -17,7 +17,7 @@ extends CanvasLayer
 #--- private variables - order: export > normal var > onready -------------------------------------
 
 var _previous_focus: Control = null
-onready var _blocker = $Blocker
+@onready var _blocker = $Blocker as Control
 
 ### -----------------------------------------------------------------------------------------------
 
@@ -39,7 +39,7 @@ func _input(event: InputEvent) -> void:
 
 func activate() -> void:
 	set_process_input(true)
-	_previous_focus = _blocker.get_focus_owner()
+	_previous_focus = _blocker.get_viewport().gui_get_focus_owner()
 	_blocker.show()
 	_blocker.grab_focus()
 

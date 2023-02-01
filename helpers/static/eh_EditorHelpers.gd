@@ -1,6 +1,7 @@
-# Simple helper functions specially when writing code inside a `tool` script.
 class_name eh_EditorHelpers
-extends Reference
+extends RefCounted
+
+## Static Helper for calling functions in the editor, usually on [code]@tool[/code] scripts
 
 ### Member Variables and Dependencies -------------------------------------------------------------
 #--- signals --------------------------------------------------------------------------------------
@@ -8,6 +9,8 @@ extends Reference
 #--- enums ----------------------------------------------------------------------------------------
 
 #--- constants ------------------------------------------------------------------------------------
+
+const WARNING_VIRTUAL_FUNC = "%s is a virtual function and was called directly, without overriding"
 
 #--- public variables - order: export > normal var > onready --------------------------------------
 
@@ -31,35 +34,23 @@ static func disable_all_processing(node: Node) -> void:
 
 
 static func is_standalone_run(node: Node) -> bool:
-	return node.get_tree().current_scene == node
-
-
-static func is_editor() -> bool:
-	return Engine.editor_hint
+	return node.is_inside_tree() and node.get_tree().current_scene == node
 
 
 static func has_editor() -> bool:
 	return OS.has_feature("editor")
 
 
-static func connect_between(
-		from: Object, p_signal: String, 
-		to: Object, p_callback: String, binds: = [], 
-		type: = 0
-) -> void:
-	var is_alright: = OK
-	if not from.is_connected(p_signal, to, p_callback):
-		is_alright = from.connect(p_signal, to, p_callback, binds, type)
-	if is_alright != OK:
-		var msg = "failed to connect %s from %s to %s in %s"%[p_signal, from, p_callback, to]
-		not_alright_error(from, msg, from.get_script())
+## Helper to connect signals with proper checking if it's not already connected.
+static func connect_between(signal_object: Signal, callable: Callable, type := 0) -> void:
+	if not signal_object.is_connected(callable):
+		signal_object.connect(callable, type)
 
 
-static func disconnect_between(
-		from: Object, p_signal: String, to: Object, p_callback: String
-) -> void:
-	if from.is_connected(p_signal, to, p_callback):
-		from.disconnect(p_signal, to, p_callback)
+## Helper to disconnect signals with proper checking if a connection actually exists.
+static func disconnect_between(signal_object: Signal, callable: Callable) -> void:
+	if signal_object.is_connected(callable):
+		signal_object.disconnect(callable)
 
 
 static func erase_key_from_dictionary(object: Object, dict_name: String, key: String) -> void:
@@ -89,14 +80,14 @@ static func not_alright_error(who:Object, why: String, where: Script) -> void:
 
 static func add_debug_camera2D_to(
 		node2D: Node2D, 
-		percent_offset: Vector2 = Vector2.INF, 
+		percent_offset: Vector2 = Vector2(INF, INF), 
 		zoom_level: Vector2 = Vector2.ONE
 ) -> void:
 	var camera: = Camera2D.new()
 	camera.name = "DebugCamera2D"
 	camera.current = true
 	camera.zoom = zoom_level
-	if percent_offset != Vector2.INF:
+	if percent_offset != Vector2(INF, INF):
 		var viewport_size = node2D.get_viewport_rect().size
 		var total_offset = viewport_size * percent_offset
 		var centered_offset = total_offset / 2.0

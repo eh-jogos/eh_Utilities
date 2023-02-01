@@ -1,7 +1,7 @@
-# A Position2D that also shows the position as a grid or tilemap value.
-tool
+# A Marker2D that also shows the position as a grid or tilemap value.
+@tool
 class_name eh_GridPosition
-extends Position2D
+extends Marker2D
 
 ### Member Variables and Dependencies -------------------------------------------------------------
 #--- signals --------------------------------------------------------------------------------------
@@ -12,29 +12,33 @@ extends Position2D
 
 #--- public variables - order: export > normal var > onready --------------------------------------
 
-var tile_position: Vector2 = Vector2.ZERO setget _set_tile_position
-var global_tile_position: Vector2 = Vector2.ZERO \
-		setget _set_global_tile_position, _get_global_tile_position
+var tile_position: Vector2 = Vector2.ZERO:
+	set = _set_tile_position
+var global_tile_position: Vector2 = Vector2.ZERO:
+		get = _get_global_tile_position, set = _set_global_tile_position
 
 #--- private variables - order: export > normal var > onready -------------------------------------
 
-var _use_tilemap: bool = false setget _set_use_tilemap
-var _path_tilemap: NodePath = NodePath("") setget _set_path_tilemap
+var _use_tilemap: bool = false :
+	set = _set_use_tilemap
+var _path_tilemap: NodePath = NodePath("") :
+	set = _set_path_tilemap
 var _reference_position: Vector2 = Vector2.ZERO
-var _reference_tile_size: Vector2 = Vector2(16, 16) setget _set_reference_tile_size
+var _reference_tile_size: Vector2 = Vector2(16, 16) :
+	set = _set_reference_tile_size
 
 ### -----------------------------------------------------------------------------------------------
 
 
 ### Built in Engine Methods -----------------------------------------------------------------------
 
-func _init() -> void:
+func _init():
 	set_process(false)
 
 
 func _ready() -> void:
 	_update_reference_position()
-	if Engine.editor_hint:
+	if Engine.is_editor_hint():
 		set_process(true)
 
 
@@ -62,10 +66,10 @@ func _set_tile_position(value: Vector2) -> void:
 		tile_position = value
 		
 		if not is_inside_tree():
-			yield(self, "ready")
+			await self.ready
 		
 		position = tile_position * _reference_tile_size
-		property_list_changed_notify()
+		notify_property_list_changed()
 
 
 func _set_global_tile_position(value: Vector2) -> void:
@@ -73,10 +77,10 @@ func _set_global_tile_position(value: Vector2) -> void:
 		global_tile_position = value
 		
 		if not is_inside_tree():
-			yield(self, "ready")
+			await self.ready
 		
 		global_position = global_tile_position * _reference_tile_size
-		property_list_changed_notify()
+		notify_property_list_changed()
 
 
 func _get_global_tile_position() -> Vector2:
@@ -87,21 +91,21 @@ func _set_use_tilemap(value: bool) -> void:
 	_use_tilemap = value
 	
 	if not is_inside_tree():
-			yield(self, "ready")
+			await self.ready
 	
 	if _use_tilemap and _path_tilemap == NodePath(""):
 		_update_reference_position()
 		_reference_tile_size = Vector2.ZERO
 	
-	property_list_changed_notify()
-	update_configuration_warning()
+	notify_property_list_changed()
+	update_configuration_warnings()
 
 
 func _set_path_tilemap(value: NodePath) -> void:
 	_path_tilemap = value
 	
 	if not is_inside_tree():
-		yield(owner, "ready")
+		await owner.ready
 	
 	var tilemap: TileMap = get_node_or_null(_path_tilemap)
 	print("path: %s | node: %s"%[_path_tilemap, tilemap])
@@ -113,14 +117,14 @@ func _set_path_tilemap(value: NodePath) -> void:
 		_update_reference_position()
 		_reference_tile_size = Vector2.ZERO
 	
-	property_list_changed_notify()
-	update_configuration_warning()
+	notify_property_list_changed()
+	update_configuration_warnings()
 
 
 func _set_reference_tile_size(value: Vector2) -> void:
 	_reference_tile_size = value
-	property_list_changed_notify()
-	update_configuration_warning()
+	notify_property_list_changed()
+	update_configuration_warnings()
 
 ### -----------------------------------------------------------------------------------------------
 
@@ -157,26 +161,26 @@ func _get_property_list() -> Array:
 	return properties
 
 
-func _get(property: String):
+func _get(property: StringName):
 	var to_return = null
 
 	return to_return
 
 
-func _set(property: String, value) -> bool:
+func _set(property: StringName, value) -> bool:
 	var has_handled: = false
 
 	return has_handled
 
 
-func _get_configuration_warning() -> String:
-	var msg: = ""
+func _get_configuration_warnings() -> PackedStringArray:
+	var msgs: = PackedStringArray()
 	
 	if _use_tilemap and _path_tilemap == NodePath(""):
-		msg = "You must set '_path_tilemap' property to a TileMap node in the inspector."
+		msgs.append("You must set '_path_tilemap' property to a TileMap node in the inspector.")
 	elif _reference_tile_size.x == 0 or _reference_tile_size.y == 0:
-		msg = "All component of _reference_tile_size must be greater than 0."
+		msgs.append("All component of _reference_tile_size must be greater than 0.")
 	
-	return msg
+	return msgs
 
 ### -----------------------------------------------------------------------------------------------

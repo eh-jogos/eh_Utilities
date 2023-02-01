@@ -1,6 +1,7 @@
-# Write your doc string for this file here
 class_name eh_DebugLogger
-extends Reference
+extends RefCounted
+
+## Write your doc string for this file here
 
 ### Member Variables and Dependencies -------------------------------------------------------------
 #--- signals --------------------------------------------------------------------------------------
@@ -33,11 +34,11 @@ static func start_new_log() -> void:
 	
 	var file_path = LOG_FILE if OS.has_feature("debug") else RELEASE_LOG_FILE
 	
-	# Improve this later to make it properly with all the error checks
-	var file = File.new()
-	file.open(file_path, File.WRITE)
+	if not FileAccess.file_exists(file_path):
+		push_error("File %s doesn't exist"%[file_path])
+		return
+	var file = FileAccess.open(file_path, FileAccess.WRITE)
 	file.store_string("")
-	file.close()
 
 
 static func log_message(msg: String) -> void:
@@ -45,22 +46,21 @@ static func log_message(msg: String) -> void:
 		return
 	
 	var date_time: = get_date_time_string()
-	var log_entry: = "%s - %09d - %s \n"%[date_time, OS.get_ticks_msec(), msg]
+	var log_entry: = "%s - %09d - %s \n"%[date_time, Time.get_ticks_msec(), msg]
 	var file_path = LOG_FILE if OS.has_feature("debug") else RELEASE_LOG_FILE
 	
-	# Improve this later to make it properly with all the error checks
-	var file = File.new()
-	file.open(file_path, File.READ_WRITE)
+	if not FileAccess.file_exists(file_path):
+		push_error("File %s doesn't exist"%[file_path])
+		return
 	
+	var file = FileAccess.open(file_path, FileAccess.WRITE)
 	var contents: String = file.get_as_text()
 	contents += log_entry
 	file.store_string(contents)
-	
-	file.close()
 
 
 static func get_date_time_string() -> String:
-	var date_time: = OS.get_datetime()
+	var date_time: = Time.get_datetime_dict_from_system()
 	var date_time_string: = "{year}-{month}-{day} {hour}-{minute}-{second}".format({
 			year = date_time.year,
 			month = "%02d"%[date_time.month],
@@ -82,7 +82,6 @@ static func _is_logging_enabled() -> bool:
 
 static func _has_created_log_file() -> bool:
 	var file_path = LOG_FILE if OS.has_feature("debug") else RELEASE_LOG_FILE
-	var file: = File.new()
-	return file.file_exists(file_path)
+	return FileAccess.file_exists(file_path)
 
 ### -----------------------------------------------------------------------------------------------

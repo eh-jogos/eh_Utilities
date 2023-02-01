@@ -1,11 +1,11 @@
 # This script is mostly to turn on or off the ability to create resources and nodes with
-# teh custom types in this addon from the editor, otherwise the class_names inside "addons" folder 
+# the custom types in this addon from the editor, otherwise the class_names inside "addons" folder 
 # get ignored by the "Create New ..." or "Add Node" dialogs in the Editor.
 #
 # But their class_name's are still available in the code autocompletion, regardless if the plugin
 # is activated or not, so things like the helpers in the static folder will work just as usual,
 # but the custom nodes and custom resources will have their workflow hindered.
-tool
+@tool
 extends EditorPlugin
 
 ### Member Variables and Dependencies -------------------------------------------------------------
@@ -49,11 +49,11 @@ func _exit_tree() -> void:
 	_remove_custom_inspectors()
 
 
-func enable_plugin() -> void:
+func _enable_plugin() -> void:
 	_add_plugin_settings()
 
 
-func disable_plugin() -> void:
+func _disable_plugin() -> void:
 	_remove_plugin_settings()
 
 ### -----------------------------------------------------------------------------------------------
@@ -88,26 +88,18 @@ func _remove_plugin_settings() -> void:
 
 
 func _add_custom_inspectors() -> void:
-	var dir := Directory.new()
-	var error := dir.open(PATH_CUSTOM_INSPECTORS)
-	
-	if error == OK:
-		dir.list_dir_begin()
-		var folder_name := dir.get_next()
-		while not folder_name.empty():
-			if dir.current_is_dir(): 
-				_load_custom_inspector_from(folder_name)
-			folder_name = dir.get_next()
-	else:
-		var error_msg = "Error code: %s | Something went wrong trying to open %s"%[
-			error, PATH_CUSTOM_INSPECTORS
-		]
+	if not DirAccess.dir_exists_absolute(PATH_CUSTOM_INSPECTORS):
+		var error_msg = "Path Doesn't exists: %s"%[PATH_CUSTOM_INSPECTORS]
 		push_error(error_msg)
+	
+	var dir := DirAccess.open(PATH_CUSTOM_INSPECTORS)
+	for folder_name in dir.get_directories():
+		_load_custom_inspector_from(folder_name)
 
 
 func _load_custom_inspector_from(folder: String) -> void:
 	var PATH_SCRIPT = "inspector_plugin.gd"
-	var full_path := PATH_CUSTOM_INSPECTORS.plus_file(folder).plus_file(PATH_SCRIPT)
+	var full_path := PATH_CUSTOM_INSPECTORS.path_join(folder).path_join(PATH_SCRIPT)
 	if ResourceLoader.exists(full_path):
 		var custom_inspector := load(full_path).new() as EditorInspectorPlugin
 		add_inspector_plugin(custom_inspector)

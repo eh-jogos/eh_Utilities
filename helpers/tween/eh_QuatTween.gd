@@ -1,3 +1,6 @@
+# TODO The warning below was for 3.x, need to see if it's still valid in 4.x or even if this helper 
+# is still useful in 4.x
+#
 # Helper class with logic to interpolate between 3d transforms correctly, but only interpolating
 # rotation.
 #
@@ -20,15 +23,15 @@ extends eh_TransformTween
 
 #--- private variables - order: export > normal var > onready -------------------------------------
 
-var _quat_from: Quat
-var _quat_to: Quat
+var _quat_from: Quaternion
+var _quat_to: Quaternion
 
 ### -----------------------------------------------------------------------------------------------
 
 
 ### Built in Engine Methods -----------------------------------------------------------------------
 
-func _init() -> void:
+func _init():
 	pass
 
 ### -----------------------------------------------------------------------------------------------
@@ -37,10 +40,10 @@ func _init() -> void:
 ### Public Methods --------------------------------------------------------------------------------
 
 
-func _setup_tween_variables(p_to: Transform) -> void:
-	._setup_tween_variables(p_to)
-	_quat_from = _from.basis.get_rotation_quat()
-	_quat_to = _to.basis.get_rotation_quat()
+func _setup_tween_variables(p_to: Transform3D) -> void:
+	super._setup_tween_variables(p_to)
+	_quat_from = _from.basis.get_rotation_quaternion()
+	_quat_to = _to.basis.get_rotation_quaternion()
 
 ### -----------------------------------------------------------------------------------------------
 
@@ -49,7 +52,7 @@ func _setup_tween_variables(p_to: Transform) -> void:
 
 func _interpolate(progress: float) -> void:
 	var new_quat = _quat_from.slerp(_quat_to, progress)
-	var new_tranform = Transform(Basis(new_quat), _from.origin)
+	var new_tranform = Transform3D(Basis(new_quat), _from.origin)
 	_node.global_transform = new_tranform
 
 ### -----------------------------------------------------------------------------------------------

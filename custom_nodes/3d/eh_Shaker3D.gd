@@ -1,20 +1,20 @@
-# Based on mainly on [Squirrel Eiserloh's GDC Talk]
+# Based mainly on [Squirrel Eiserloh's GDC Talk]
 # (https://www.youtube.com/watch?v=tu-Qe66AvtY&list=PLBfFh5W1T7RItlrRJryozPUE6tpO0uOHT&index=46&t=4s)
-# , [Kid's Can Code Godot Recipe] (https://kidscancode.org/godot_recipes/2d/screen_shake/) for an
-# initial Godot Script and adpatations, plus [this tutorial]
+# , [Kid's Can Code Godot Recipe] (https://kidscancode.org/godot_recipes/3.x/2d/screen_shake/) 
+# for an initial Godot Script and adpatations, plus [this tutorial]
 # (http://www.briscoe.ca/notes/camera-shake/) to add direction.
-# It works for any Spatial node, not only Camera, and it's already responsive to changes in 
+# It works for any Node3D node, not only Camera3D, and it's already responsive to changes in 
 # time scale (like slow motion or any other effect of this kind).
 #
 # But try to add it to nodes which the position and rotation does not change during runtime, or 
 # at least do not change often. The code tries to acknowledge the base position and base rotation 
 # of the target node, but it only updates when you add trauma and trauma was 0, so it won't update 
 # again until the shake stops. 
-# If you need to add to a camera or player, add a "pivot" Spatial that holds the position and 
+# If you need to add to a camera or player, add a "pivot" Node3D that holds the position and 
 # rotation for the object so that you can move the pivot around. Or add a "ShakyCamera" as a child 
 # of you normal camera and this Shaker to it. In the case of the player, you can add the Shaker 
-# only to the player's skin and not to the Kinematic/RigidBody.
-tool
+# only to the player's skin and not to the CharacterBody3D/RigidBody3D.
+@tool
 class_name eh_shaker3D
 extends Node
 
@@ -31,21 +31,21 @@ const TIME_UNIT = 0.0001
 
 #--- public variables - order: export > normal var > onready --------------------------------------
 
-export var shake_target: NodePath = NodePath("..")
+@export var shake_target: NodePath = NodePath("..")
 
 # How quickly the shaking stops [0, 1].
-export var decay: float = 0.8  
+@export var decay: float = 0.8  
 
 # Maximum rotation in degrees. (Rotation on the y axis)
-export(float, 0.0, 360.0, 1) var max_yaw: float = 5
+@export_range(0.0, 360.0, 1) var max_yaw: float = 5
 # Maximum rotation in degrees. (Rotation on the z axys) 
-export(float, 0.0, 360.0, 1) var max_pitch: float = 5
+@export_range(0.0, 360.0, 1) var max_pitch: float = 5
 # Maximum rotation in degrees. (Rotation on the x axis)
-export(float, 0.0, 360.0, 1) var max_roll: float = 5  
+@export_range(0.0, 360.0, 1) var max_roll: float = 5
 # For smooth randomness in the shake movement.
-export var noise: OpenSimplexNoise = OpenSimplexNoise.new() as OpenSimplexNoise
+@export var noise := FastNoiseLite.new()
 # Trauma exponent.
-export(int, 2, 3, 1) var trauma_power: int = 2
+@export_range(2, 3, 1) var trauma_power: int = 2
 
 #--- private variables - order: export > normal var > onready -------------------------------------
 
@@ -60,9 +60,16 @@ var _time: float = 0.0
 var base_rotation: Vector3 = Vector3.ZERO
 
 # Test and Debugging Variables for the editor
-var _test_trauma: float = 0.0 setget _set_test_trauma
+var _test_trauma: float = 0.0 :
+	set = _set_test_trauma
 
-onready var _target: Spatial = get_node(shake_target)
+## These are just some arbitrary values to take samples for each axis at a fair amount of
+## distance from each other. I used to just use the seed like in the kid's can code linked, but
+## it doesn't work on godot 4, some huge integers (above 10.000.000) give errors, even though they 
+## are valid as seeds
+var _sampling_distance := randi_range(512, 1024)
+
+@onready var _target: Node3D = get_node(shake_target)
 
 ### -----------------------------------------------------------------------------------------------
 
@@ -77,7 +84,7 @@ func _ready():
 	
 	add_child(_timer, true)
 	_timer.one_shot = true
-	_timer.connect("timeout", self, "_on_timer_timeout")
+	_timer.connect("timeout",Callable(self,"_on_timer_timeout"))
 	_timer.start(TIME_UNIT)
 
 
@@ -101,7 +108,7 @@ func _get_property_list() -> Array:
 	})
 	list.append({
 		"name": "_test_trauma",
-		"type": TYPE_REAL,
+		"type": TYPE_FLOAT,
 		"usage": PROPERTY_USAGE_SCRIPT_VARIABLE | PROPERTY_USAGE_DEFAULT,
 		"hint": PROPERTY_HINT_RANGE,
 		"hint_string": "0,1,0.01"
@@ -137,7 +144,7 @@ func _set_test_trauma(value: float) -> void:
 
 
 func _test_add_trauma() -> void:
-	if eh_EditorHelpers.is_editor():
+	if Engine.is_editor_hint():
 		add_trauma(_test_trauma)
 	else:
 		push_warning("This variable is only for tests in the editor, it doesn't work in runtime.")
@@ -155,13 +162,20 @@ func _shake():
 	var shake_amount = pow(_trauma, trauma_power)
 	var rotation_factor: = Vector3.ZERO
 	
-	rotation_factor.y = deg2rad(max_yaw) * shake_amount * noise.get_noise_2d(noise.seed, _time)
-	rotation_factor.z = deg2rad(max_pitch) * shake_amount * noise.get_noise_2d(noise.seed * 2, _time)
-	rotation_factor.x = deg2rad(max_roll) * shake_amount * noise.get_noise_2d(noise.seed * 3, _time)
+	rotation_factor.y = (
+			deg_to_rad(max_yaw) * shake_amount 
+			* noise.get_noise_2d(_sampling_distance, _time)
+	)
+	rotation_factor.z = (
+			deg_to_rad(max_pitch) * shake_amount 
+			* noise.get_noise_2d(_sampling_distance * 2, _time)
+	)
+	rotation_factor.x = (
+			deg_to_rad(max_roll) * shake_amount 
+			* noise.get_noise_2d(_sampling_distance * 3, _time)
+	)
 	
-	_target.rotation.y = base_rotation.y + rotation_factor.y
-	_target.rotation.z = base_rotation.z + rotation_factor.z
-	_target.rotation.x = base_rotation.x + rotation_factor.x
+	_target.rotation = base_rotation + rotation_factor
 
 
 func _on_timer_timeout() -> void:

@@ -13,6 +13,7 @@ const BULK_SAVE_PANEL = preload("res://addons/eh_jogos.utilities/custom_inspecto
 
 #--- public variables - order: export > normal var > onready --------------------------------------
 
+var parent_plugin: EditorPlugin = null
 
 #--- private variables - order: export > normal var > onready -------------------------------------
 
@@ -28,6 +29,7 @@ func _can_handle(object) -> bool:
 func _parse_begin(object: Object) -> void:
 	var bulk_save_panel := BULK_SAVE_PANEL.instantiate()
 	bulk_save_panel.animation_player = object as AnimationPlayer
+	bulk_save_panel.editor_interface = parent_plugin.get_editor_interface()
 	add_custom_control(bulk_save_panel)
 
 ### -----------------------------------------------------------------------------------------------

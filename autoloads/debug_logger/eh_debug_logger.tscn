@@ -1,9 +1,9 @@
 [gd_scene load_steps=2 format=3 uid="uid://3hpc7r8lm4y1"]
 
-[ext_resource type="Script" path="res://addons/quiver.beat_em_up/utilities/helpers/autoload/debug_logger/quiver_debug_logger.gd" id="1_sq5ue"]
+[ext_resource type="Script" path="res://addons/eh_jogos.utilities/autoloads/debug_logger/eh_debug_logger.gd" id="1_r050t"]
 
-[node name="QuiverDebugLogger" type="Node"]
-script = ExtResource("1_sq5ue")
+[node name="EhDebugLogger" type="Node"]
+script = ExtResource("1_r050t")
 
 [node name="FlushLogTimer" type="Timer" parent="."]
 wait_time = 30.0

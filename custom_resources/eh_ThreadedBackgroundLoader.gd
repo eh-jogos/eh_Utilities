@@ -24,6 +24,9 @@ var _loaded_resource: Resource = null
 var _is_aborting_load := false
 var _has_finished_loading := false
 
+var _debug_loading_time := 0
+var _debug_timer: SceneTreeTimer = null
+
 ### -----------------------------------------------------------------------------------------------
 
 
@@ -79,10 +82,11 @@ func has_finished() -> bool:
 
 func is_loading() -> bool:
 	var status := ResourceLoader.load_threaded_get_status(_path_to_load)
-	return status == ResourceLoader.THREAD_LOAD_IN_PROGRESS
+	var should_force_loading = _debug_timer != null and _debug_timer.time_left > 0
+	return status == ResourceLoader.THREAD_LOAD_IN_PROGRESS or should_force_loading
 
 
-func start_loading(p_path: String = "") -> void:
+func start_loading(p_path: String = "", force_loading_time := 0) -> void:
 	if _is_aborting_load:
 		await self.loading_safely_aborted
 	
@@ -103,6 +107,7 @@ func start_loading(p_path: String = "") -> void:
 		return
 	
 	clear_loaded_resource()
+	_debug_loading_time = force_loading_time
 	ResourceLoader.load_threaded_request(_path_to_load, "", false, ResourceLoader.CACHE_MODE_REUSE)
 	_process_progress()
 
@@ -118,6 +123,7 @@ func clear_loaded_resource() -> void:
 	
 	_loaded_resource = null
 	_has_finished_loading = false
+	_debug_loading_time = 0
 
 
 func abort_loading() -> void:
@@ -131,6 +137,8 @@ func abort_loading() -> void:
 
 func _process_progress() -> void:
 	var tree: = Engine.get_main_loop() as SceneTree
+	if _debug_loading_time > 0:
+		_debug_timer = tree.create_timer(_debug_loading_time)
 	
 	var progress_array := []
 	var status := ResourceLoader.load_threaded_get_status(_path_to_load, progress_array)
@@ -145,6 +153,9 @@ func _process_progress() -> void:
 			break
 		else:
 			status = ResourceLoader.load_threaded_get_status(_path_to_load, progress_array)
+	
+	if _debug_timer != null and _debug_timer.time_left > 0:
+		await _debug_timer.timeout
 	
 	if status == ResourceLoader.THREAD_LOAD_LOADED:
 		_loaded_resource = ResourceLoader.load_threaded_get(_path_to_load)
@@ -171,6 +182,7 @@ func _on_loading_thread_aborted() -> void:
 	_loaded_resource = null
 	_is_aborting_load = false
 	_has_finished_loading = false
+	_debug_loading_time = 0
 	emit_signal("loading_safely_aborted")
 
 ### -----------------------------------------------------------------------------------------------

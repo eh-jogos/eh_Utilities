@@ -1,6 +1,6 @@
 # Write your doc string for this file here
 class_name eh_ThreadedBackgroundLoader
-extends Resource
+extends RefCounted
 
 ### Member Variables and Dependencies -------------------------------------------------------------
 #--- signals --------------------------------------------------------------------------------------
@@ -28,9 +28,6 @@ var _has_finished_loading := false
 
 
 ### Built in Engine Methods -----------------------------------------------------------------------
-
-func _init():
-	pass
 
 ### -----------------------------------------------------------------------------------------------
 
@@ -143,7 +140,6 @@ func _process_progress() -> void:
 		
 		await tree.process_frame 
 		
-		_is_aborting_load
 		if _is_aborting_load:
 			status = ERR_PRINTER_ON_FIRE
 			break

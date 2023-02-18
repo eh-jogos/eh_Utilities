@@ -88,7 +88,7 @@ func _physics_process(delta: float) -> void:
 ## dictionary to be passed to the [method QuiverState.enter] method of the new state.[br]
 ## Note that the [NodePath] passed in must be relative to the StateMachine node.
 func transition_to(target_state_path: String, msg: = {}) -> void:
-	if not active: 
+	if not is_active: 
 		return
 	elif not has_node(target_state_path):
 		push_error("Could not find state in path: %s"%[target_state_path])

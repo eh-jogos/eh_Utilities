@@ -113,6 +113,8 @@ func start_loading(p_path: String = "", force_loading_time := 0) -> void:
 
 
 func get_loaded_resource() -> Resource:
+	if _loaded_resource == null:
+		push_error("Has not finished loading resource at path %s"%[_path_to_load])
 	return _loaded_resource
 
 

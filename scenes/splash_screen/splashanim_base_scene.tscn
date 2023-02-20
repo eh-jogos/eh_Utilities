@@ -1,6 +1,6 @@
-[gd_scene load_steps=2 format=3 uid="uid://ct8h1n13qggoa"]
+[gd_scene load_steps=2 format=3 uid="uid://d34ib84rm8xlu"]
 
-[ext_resource type="Script" path="res://addons/eh_jogos.utilities/scenes/splash_screen/splash_animation.gd" id="1_tt1dh"]
+[ext_resource type="Script" path="res://addons/eh_jogos.utilities/scenes/splash_screen/eh_splash_animation.gd" id="1_2afg1"]
 
 [node name="SplasAnim" type="Control"]
 layout_mode = 3
@@ -10,7 +10,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-script = ExtResource("1_tt1dh")
+script = ExtResource("1_2afg1")
 main_animation = &"main"
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]

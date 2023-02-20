@@ -47,6 +47,22 @@ extends RefCounted
 
 ### Public Methods --------------------------------------------------------------------------------
 
+static func get_prop_dict(
+		p_name: StringName, 
+		p_type: int, 
+		p_hint := PROPERTY_HINT_NONE, 
+		p_hint_string := "",
+		p_usage := PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_SCRIPT_VARIABLE
+) -> Dictionary:
+	return {
+			name = p_name,
+			type = p_type,
+			usage = p_usage,
+			hint = p_hint,
+			hint_string = p_hint_string,
+	}
+
+
 static func get_enum_hint_for(
 		string_array: PackedStringArray, 
 		should_capitalize: = true
@@ -72,37 +88,15 @@ static func add_line_break_if_not_empty(msg: String) -> String:
 ### -----------------------------------------------------------------------------------------------
 
 ### Code Snippets -------------------------------------------------------------------
-
+#
 ####################################################################################################
 ## Custom Inspector ################################################################################
 ####################################################################################################
-#
-#func _get_custom_properties() -> Dictionary:
-#	return {
-##		"": {
-##			backing_field = "",
-##			name = "",
-##			type = TYPE_NIL,
-##			usage = PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_SCRIPT_VARIABLE,
-##			hint = PROPERTY_HINT_NONE,
-##			hint_string = "",
-##		},
-#}
 #
 #### Custom Inspector built in functions -----------------------------------------------------------
 #
 #func _get_property_list() -> Array:
 #	var properties: = []
-#	
-#	var custom_properties := _get_custom_properties()
-#	for key in custom_properties:
-#		var add_property := true
-#		var dict: Dictionary = custom_properties[key]
-#		if not dict.has("name"):
-#			dict.name = key
-#	
-#		if add_property:
-#			properties.append(dict)
 #	
 #	return properties
 #
@@ -110,20 +104,19 @@ static func add_line_break_if_not_empty(msg: String) -> String:
 #func _get(property: StringName):
 #	var value
 #	
-#	var custom_properties := _get_custom_properties()
-#	if property in custom_properties and custom_properties[property].has("backing_field"):
-#		value = get(custom_properties[property]["backing_field"])
+#	match property:
+#		_:
+#			pass
 #	
 #	return value
 #
 #
 #func _set(property: StringName, value) -> bool:
-#	var has_handled: = false
+#	var has_handled: = true
 #	
-#	var custom_properties := _get_custom_properties()
-#	if property in custom_properties and custom_properties[property].has("backing_field"):
-#		set(custom_properties[property]["backing_field"], value)
-#		has_handled = true
+#	match property:
+#		_:
+#			has_handled = false
 #	
 #	return has_handled
 #

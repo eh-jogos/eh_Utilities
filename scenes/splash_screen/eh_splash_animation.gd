@@ -164,11 +164,13 @@ func _get(property: StringName):
 
 
 func _set(property: StringName, value) -> bool:
-	var has_handled: = false
+	var has_handled: = true
 	
 	match property:
 		PROP_MAIN_ANIMATION:
 			_main_animation = value
+		_:
+			has_handled = false
 	
 	return has_handled
 

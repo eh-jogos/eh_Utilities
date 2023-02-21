@@ -34,8 +34,7 @@ func _ready() -> void:
 	if _loader.is_loading():
 		await _loader.loading_finished
 	
-	var packed_scene: PackedScene = _loader.get_loaded_resource()
-	get_tree().change_scene_to_packed(packed_scene)
+	_change_to_next_scene()
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -72,5 +71,10 @@ func _process_splash_animations() -> void:
 		
 		await splash_anim.splash_animation_finished
 		splash_anim.hide()
+
+
+func _change_to_next_scene() -> void:
+	var packed_scene: PackedScene = _loader.get_loaded_resource()
+	get_tree().change_scene_to_packed(packed_scene)
 
 ### -----------------------------------------------------------------------------------------------

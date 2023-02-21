@@ -151,7 +151,6 @@ func _process_progress() -> void:
 		await tree.process_frame 
 		
 		if _is_aborting_load:
-			status = ERR_PRINTER_ON_FIRE
 			break
 		else:
 			status = ResourceLoader.load_threaded_get_status(_path_to_load, progress_array)
@@ -159,12 +158,12 @@ func _process_progress() -> void:
 	if _debug_timer != null and _debug_timer.time_left > 0:
 		await _debug_timer.timeout
 	
-	if status == ResourceLoader.THREAD_LOAD_LOADED:
+	if _is_aborting_load:
+		call_deferred("_on_loading_thread_aborted")
+	elif status == ResourceLoader.THREAD_LOAD_LOADED:
 		_loaded_resource = ResourceLoader.load_threaded_get(_path_to_load)
 		emit_signal("loading_progressed", 1.0)
 		call_deferred("_on_thread_finished")
-	elif status == ERR_PRINTER_ON_FIRE:
-		call_deferred("_on_loading_thread_aborted")
 	else:
 		push_error("Something went wrong when trying to load %s. Error Code: %s"%[
 				_path_to_load, status

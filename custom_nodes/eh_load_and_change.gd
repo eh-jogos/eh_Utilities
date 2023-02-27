@@ -1,4 +1,6 @@
-extends Control
+@tool
+class_name eh_SceneLoadAndChange
+extends Node
 
 ## Write your doc string for this file here
 
@@ -11,14 +13,14 @@ extends Control
 
 #--- public variables - order: export > normal var > onready --------------------------------------
 
-@export_file("*.tscn") var next_scene := ""
+@export_file("*.tscn") var next_scene := "":
+	set(value):
+		next_scene = value
+		update_configuration_warnings()
 
 #--- private variables - order: export > normal var > onready -------------------------------------
 
 var _loader := eh_ThreadedBackgroundLoader.new()
-var _current_splash: eh_SplashAnimation = null
-
-@onready var _sequence: Control = $Sequence
 
 ### -----------------------------------------------------------------------------------------------
 
@@ -29,52 +31,35 @@ func _ready() -> void:
 	if not next_scene.is_empty():
 		_loader.start_loading(next_scene)
 	
-	await _process_splash_animations()
-	
-	_change_to_next_scene()
+	var parent = get_parent()
+	await parent.ready
+	if parent is BaseButton:
+		(parent as BaseButton).pressed.connect(change_to_next_scene)
 
 
-func _unhandled_input(event: InputEvent) -> void:
-	if _current_splash == null:
-		return
+func _get_configuration_warnings() -> PackedStringArray:
+	var warnings := PackedStringArray()
 	
-	if not event is InputEventMouseMotion:
-		_current_splash.skip_splash_animation()
+	if next_scene.is_empty():
+		warnings.append("next_scene path hasn't been set.")
+	
+	return warnings
 
 ### -----------------------------------------------------------------------------------------------
 
 
 ### Public Methods --------------------------------------------------------------------------------
 
-### -----------------------------------------------------------------------------------------------
-
-
-### Private Methods -------------------------------------------------------------------------------
-
-func _process_splash_animations() -> void:
-	var splash_animations := _sequence.get_children()
-	
-	for node in splash_animations:
-		node.hide()
-		if node is eh_eh_SplashAnimationLoading:
-			node.loader = _loader
-	
-	for node in splash_animations:
-		var splash_anim := node as eh_SplashAnimation
-		_current_splash = splash_anim
-		
-		splash_anim.show()
-		splash_anim.play_splash_animation()
-		
-		await splash_anim.splash_animation_finished
-		splash_anim.hide()
-
-
-func _change_to_next_scene() -> void:
+func change_to_next_scene() -> void:
 	if _loader.is_loading():
 		await _loader.loading_finished
 	
 	var packed_scene: PackedScene = _loader.get_loaded_resource()
 	get_tree().change_scene_to_packed(packed_scene)
+
+### -----------------------------------------------------------------------------------------------
+
+
+### Private Methods -------------------------------------------------------------------------------
 
 ### -----------------------------------------------------------------------------------------------

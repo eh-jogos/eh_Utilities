@@ -101,6 +101,18 @@ static func add_line_break_if_not_empty(msg: String) -> String:
 #	return properties
 #
 #
+#func _property_can_revert(property: StringName) -> bool:
+#	var can_revert = false
+#	
+#	return can_revert
+#
+#
+#func _property_get_revert(property: StringName):
+#	var value
+#	
+#	return value
+#
+#
 #func _get(property: StringName):
 #	var value
 #	

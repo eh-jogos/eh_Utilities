@@ -1,5 +1,5 @@
 # Write your doc string for this file here
-tool
+@tool
 class_name eh_RemoteVisibility
 extends Node
 
@@ -12,12 +12,13 @@ extends Node
 
 #--- public variables - order: export > normal var > onready --------------------------------------
 
-export var remote_path: NodePath = NodePath("") setget _set_remote_path
+@export var remote_path: NodePath = NodePath("") :
+	set = _set_remote_path
 
 #--- private variables - order: export > normal var > onready -------------------------------------
 
 var _remote_visibility: Node
-var _parent_node: Node
+var _parent_node: CanvasItem
 
 ### -----------------------------------------------------------------------------------------------
 
@@ -26,18 +27,22 @@ var _parent_node: Node
 
 func _enter_tree() -> void:
 	_parent_node = get_parent()
-	update_configuration_warning()
+	update_configuration_warnings()
 
 
-func _get_configuration_warning() -> String:
-	var msg: = ""
+func _get_configuration_warnings() -> PackedStringArray:
+	var msgs: = PackedStringArray()
 	
 	if _remote_visibility == null or not "visible" in _remote_visibility:
-		msg = "Path property must point to a node that has the visible property (eye icon)."
+		msgs.append(
+				"remote_path property must point to a node that has the visible property (eye icon)."
+		)
 	elif not "visible" in _parent_node:
-		msg = "This node must be a child of a node that has the visible property (eye icon)."
+		msgs.append(
+				"This node must be a child of a node that has the visible property (eye icon)."
+		)
 	
-	return msg
+	return msgs
 
 ### -----------------------------------------------------------------------------------------------
 
@@ -56,17 +61,19 @@ func _set_remote_path(value: NodePath) -> void:
 	remote_path = value
 	
 	if not is_inside_tree():
-		yield(self, "ready")
+		await self.ready
 	
+	eh_EditorHelpers.disconnect_between(
+			_parent_node.visibility_changed, _on_remote_visibility_changed
+	)
 	if remote_path != NodePath(""):
 		if _remote_visibility != null:
-			if _parent_node.is_connected("visibility_changed", self, \
-					"_on_remote_visibility_changed"):
-				_parent_node.disconnect("visibility_changed", self, \
-						"_on_remote_visibility_changed")
+			eh_EditorHelpers.disconnect_between(
+					_parent_node.visibility_changed, _on_remote_visibility_changed
+			)
 		
 		_remote_visibility = get_node(remote_path)
-		update_configuration_warning()
+		update_configuration_warnings()
 		if not "visible" in _remote_visibility:
 			remote_path = NodePath("")
 			_remote_visibility = null
@@ -74,10 +81,9 @@ func _set_remote_path(value: NodePath) -> void:
 		
 		update_visibility()
 		
-		if not _parent_node.is_connected("visibility_changed", self, \
-				"_on_remote_visibility_changed"):
-			_parent_node.connect("visibility_changed", self, \
-					"_on_remote_visibility_changed")
+		eh_EditorHelpers.connect_between(
+				_parent_node.visibility_changed, _on_remote_visibility_changed
+		)
 
 
 func _on_remote_visibility_changed() -> void:

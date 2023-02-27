@@ -1,0 +1,96 @@
+[gd_scene load_steps=5 format=3 uid="uid://b83ktdpsfl4ar"]
+
+[ext_resource type="Texture2D" uid="uid://cy3ukfoqsawlc" path="res://addons/eh_jogos.utilities/custom_inspectors/bulk_save_animations/engine_folder_icon.tres" id="1_fbc4d"]
+[ext_resource type="Script" path="res://addons/eh_jogos.utilities/custom_inspectors/bulk_save_animations/bulk_save_control.gd" id="1_qlarh"]
+[ext_resource type="Theme" uid="uid://cjppijidwkwok" path="res://addons/eh_jogos.utilities/theme_editor_button.tres" id="2_ren0h"]
+
+[sub_resource type="Theme" id="Theme_l118y"]
+Error/base_type = &"Label"
+Error/colors/font_color = Color(1, 0.470588, 0.419608, 1)
+Warning/base_type = &"Label"
+Warning/colors/font_color = Color(1, 1, 0, 1)
+
+[node name="BulkAnimSaveControl" type="VBoxContainer"]
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 31.0
+grow_horizontal = 2
+theme = SubResource("Theme_l118y")
+script = ExtResource("1_qlarh")
+
+[node name="BaseFolderLine" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="BaseFolderLine"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "base folder"
+
+[node name="Editable" type="HBoxContainer" parent="BaseFolderLine"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="LineEdit" type="LineEdit" parent="BaseFolderLine/Editable"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="FolderDialog" type="Button" parent="BaseFolderLine/Editable"]
+layout_mode = 2
+icon = ExtResource("1_fbc4d")
+
+[node name="PathErrors" type="VBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="ErrorEmpty" type="Label" parent="PathErrors"]
+layout_mode = 2
+theme_type_variation = &"Error"
+text = "Base export path is empty"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="ErrorRes" type="Label" parent="PathErrors"]
+layout_mode = 2
+theme_type_variation = &"Error"
+text = "Path must be a local to the project and start with res://"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="PathWarnings" type="VBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="WarnCreate" type="Label" parent="PathWarnings"]
+layout_mode = 2
+theme_type_variation = &"Warning"
+text = "Folder doesn't exist and will be created.
+"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="WarnOverwrite" type="Label" parent="PathWarnings"]
+layout_mode = 2
+theme_type_variation = &"Warning"
+text = "Folder already exists and is not empty, any files with the same name will be overwritten."
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="LibraryPicker" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="LibraryPicker"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "libraries to export
+"
+
+[node name="LibrariesList" type="VBoxContainer" parent="LibraryPicker"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ExportButton" type="Button" parent="."]
+layout_mode = 2
+theme = ExtResource("2_ren0h")
+text = "Export"
+
+[connection signal="text_changed" from="BaseFolderLine/Editable/LineEdit" to="." method="_on_line_edit_text_changed"]
+[connection signal="pressed" from="BaseFolderLine/Editable/FolderDialog" to="." method="_on_folder_dialog_pressed"]
+[connection signal="pressed" from="ExportButton" to="." method="_on_export_button_pressed"]

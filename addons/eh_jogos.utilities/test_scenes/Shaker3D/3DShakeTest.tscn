@@ -1,123 +1,166 @@
-[gd_scene load_steps=11 format=2]
+[gd_scene load_steps=12 format=3 uid="uid://b8qu7kfwh0gwv"]
 
-[ext_resource path="res://addons/eh_jogos.utilities/custom_nodes/3d/eh_Shaker3D.gd" type="Script" id=2]
-[ext_resource path="res://addons/eh_jogos.utilities/test_scenes/Shaker2D/TraumaDebugControls.tscn" type="PackedScene" id=3]
+[ext_resource type="Script" path="res://addons/eh_jogos.utilities/custom_nodes/3d/eh_Shaker3D.gd" id="2"]
+[ext_resource type="PackedScene" path="res://addons/eh_jogos.utilities/test_scenes/Shaker2D/TraumaDebugControls.tscn" id="3"]
 
-[sub_resource type="PlaneMesh" id=1]
-size = Vector2( 50, 50 )
+[sub_resource type="PlaneMesh" id="1"]
+size = Vector2(50, 50)
 
-[sub_resource type="SpatialMaterial" id=2]
-albedo_color = Color( 0.623529, 0.345098, 0.121569, 1 )
+[sub_resource type="CapsuleMesh" id="9"]
+radius = 0.25
+height = 0.5
 
-[sub_resource type="CapsuleMesh" id=9]
-radius = 0.5
-mid_height = 0.5
+[sub_resource type="Sky" id="4"]
 
-[sub_resource type="ProceduralSky" id=4]
-ground_bottom_color = Color( 0.490196, 0.337255, 0.207843, 1 )
-ground_horizon_color = Color( 0.627451, 0.745098, 0.827451, 1 )
-
-[sub_resource type="Environment" id=5]
+[sub_resource type="Environment" id="5"]
 background_mode = 2
-background_sky = SubResource( 4 )
-background_sky_orientation = Basis( -1, 0, -3.25841e-07, 0, 1, 0, 3.25841e-07, 0, -1 )
-auto_exposure_enabled = true
+sky = SubResource("4")
+sky_rotation = Vector3(0, -3.14159, 0)
 glow_enabled = true
-glow_levels/6 = true
+glow_levels/6 = 1.0
 glow_strength = 1.1
 
-[sub_resource type="OpenSimplexNoise" id=6]
-seed = -676893011
-octaves = 2
-period = 12.0
+[sub_resource type="FastNoiseLite" id="6"]
+seed = -932322304
+frequency = 0.217
+fractal_octaves = 2
 
-[sub_resource type="NoiseTexture" id=8]
+[sub_resource type="NoiseTexture2D" id="8"]
 width = 340
 height = 340
-noise = SubResource( 6 )
+noise = SubResource("6")
 
-[sub_resource type="Animation" id=7]
-length = 30.0
-loop = true
+[sub_resource type="Animation" id="Animation_8w3c1"]
+length = 0.001
 tracks/0/type = "bezier"
-tracks/0/path = NodePath(".:rotation_degrees:x")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
 tracks/0/imported = false
 tracks/0/enabled = true
+tracks/0/path = NodePath(".:rotation:x")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
 tracks/0/keys = {
-"points": PoolRealArray( 0, -0.25, 0, 0.25, 0 ),
-"times": PoolRealArray( 0 )
+"handle_modes": PackedInt32Array(0),
+"points": PackedFloat32Array(0, -0.25, 0, 0.25, 0),
+"times": PackedFloat32Array(0)
 }
 tracks/1/type = "bezier"
-tracks/1/path = NodePath(".:rotation_degrees:y")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
 tracks/1/imported = false
 tracks/1/enabled = true
+tracks/1/path = NodePath(".:rotation:y")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
 tracks/1/keys = {
-"points": PoolRealArray( 0, 0, 0, 0, 0, 360, 0, 0, 0, 0 ),
-"times": PoolRealArray( 0, 30 )
+"handle_modes": PackedInt32Array(0),
+"points": PackedFloat32Array(0, -0.25, 0, 0.25, 0),
+"times": PackedFloat32Array(0)
 }
 tracks/2/type = "bezier"
-tracks/2/path = NodePath(".:rotation_degrees:z")
-tracks/2/interp = 1
-tracks/2/loop_wrap = true
 tracks/2/imported = false
 tracks/2/enabled = true
+tracks/2/path = NodePath(".:rotation:z")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
 tracks/2/keys = {
-"points": PoolRealArray( 0, -0.25, 0, 0.25, 0 ),
-"times": PoolRealArray( 0 )
+"handle_modes": PackedInt32Array(0),
+"points": PackedFloat32Array(0, -0.25, 0, 0.25, 0),
+"times": PackedFloat32Array(0)
 }
 
-[node name="3DShakeTest" type="Spatial"]
+[sub_resource type="Animation" id="7"]
+length = 30.0
+loop_mode = 1
+tracks/0/type = "bezier"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:rotation:x")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"handle_modes": PackedInt32Array(0),
+"points": PackedFloat32Array(0, -0.25, 0, 0.25, 0),
+"times": PackedFloat32Array(0)
+}
+tracks/1/type = "bezier"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath(".:rotation:y")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"handle_modes": PackedInt32Array(0, 0),
+"points": PackedFloat32Array(0, -0.25, 0, 0.25, 0, 6.28319, -0.25, 0, 0.25, 0),
+"times": PackedFloat32Array(0, 30)
+}
+tracks/2/type = "bezier"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath(".:rotation:z")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"handle_modes": PackedInt32Array(0),
+"points": PackedFloat32Array(0, -0.25, 0, 0.25, 0),
+"times": PackedFloat32Array(0)
+}
 
-[node name="Ground" type="MeshInstance" parent="."]
-mesh = SubResource( 1 )
-material/0 = SubResource( 2 )
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_m1aoh"]
+_data = {
+"RESET": SubResource("Animation_8w3c1"),
+"idle": SubResource("7")
+}
 
-[node name="Player" type="MeshInstance" parent="."]
-transform = Transform( 1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0.75, 0 )
-mesh = SubResource( 9 )
-material/0 = null
+[node name="3DShakeTest" type="Node3D"]
+
+[node name="Ground" type="MeshInstance3D" parent="."]
+mesh = SubResource("1")
+
+[node name="Player" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0.75, 0)
+mesh = SubResource("9")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
-environment = SubResource( 5 )
+environment = SubResource("5")
 
-[node name="DirectionalLight" type="DirectionalLight" parent="."]
-transform = Transform( 1, 0, 0, 0, 0.835644, 0.549271, 0, -0.549271, 0.835644, 0, 6.17818, 0 )
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.835644, 0.549271, 0, -0.549271, 0.835644, 0, 6.17818, 0)
 shadow_enabled = true
 
 [node name="TestHUD" type="CanvasLayer" parent="."]
 
 [node name="TextureRect" type="TextureRect" parent="TestHUD"]
-margin_left = 16.0
-margin_top = 16.0
-margin_right = 356.0
-margin_bottom = 356.0
-texture = SubResource( 8 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 356.0
+offset_bottom = 356.0
+texture = SubResource("8")
 
-[node name="TraumaDebugControls" parent="TestHUD" instance=ExtResource( 3 )]
+[node name="TraumaDebugControls" parent="TestHUD" instance=ExtResource("3")]
+anchors_preset = 10
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 4.0
+grow_horizontal = 2
 _path_shaker = NodePath("../../CameraRoot/CameraPivot/ShakyCamera/eh_shaker3D")
 
-[node name="CameraRoot" type="Spatial" parent="."]
+[node name="CameraRoot" type="Node3D" parent="."]
 
-[node name="CameraPivot" type="Spatial" parent="CameraRoot"]
-transform = Transform( 1, 0, 0, 0, 0.93943, 0.342742, 0, -0.342742, 0.93943, 0, 1.91923, 2.35311 )
+[node name="CameraPivot" type="Node3D" parent="CameraRoot"]
+transform = Transform3D(1, 0, 0, 0, 0.93943, 0.342742, 0, -0.342742, 0.93943, 0, 1.91923, 2.35311)
 
-[node name="ShakyCamera" type="Camera" parent="CameraRoot/CameraPivot"]
+[node name="ShakyCamera" type="Camera3D" parent="CameraRoot/CameraPivot"]
+rotation_order = 3
 
 [node name="eh_shaker3D" type="Node" parent="CameraRoot/CameraPivot/ShakyCamera"]
-script = ExtResource( 2 )
+script = ExtResource("2")
 max_yaw = 10.0
 max_pitch = 10.0
 max_roll = 15.0
-noise = SubResource( 6 )
-_test_trauma = 0.3
+noise = SubResource("6")
+_test_trauma = 0.35
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="CameraRoot"]
 autoplay = "idle"
-anims/idle = SubResource( 7 )
+libraries = {
+"": SubResource("AnimationLibrary_m1aoh")
+}

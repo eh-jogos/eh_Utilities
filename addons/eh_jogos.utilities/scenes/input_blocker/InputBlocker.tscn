@@ -9,10 +9,10 @@ script = ExtResource( 1 )
 [node name="Blocker" type="Control" parent="."]
 anchor_right = 1.0
 anchor_bottom = 1.0
-focus_neighbour_left = NodePath(".")
-focus_neighbour_top = NodePath(".")
-focus_neighbour_right = NodePath(".")
-focus_neighbour_bottom = NodePath(".")
+focus_neighbor_left = NodePath(".")
+focus_neighbor_top = NodePath(".")
+focus_neighbor_right = NodePath(".")
+focus_neighbor_bottom = NodePath(".")
 focus_next = NodePath(".")
 focus_previous = NodePath(".")
 focus_mode = 2

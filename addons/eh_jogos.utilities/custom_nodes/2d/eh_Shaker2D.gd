@@ -1,9 +1,9 @@
-# Based on mainly on [Squirrel Eiserloh's GDC Talk]
+# Based mainly on [Squirrel Eiserloh's GDC Talk]
 # (https://www.youtube.com/watch?v=tu-Qe66AvtY&list=PLBfFh5W1T7RItlrRJryozPUE6tpO0uOHT&index=46&t=4s)
 # , [Kid's Can Code Godot Recipe] (https://kidscancode.org/godot_recipes/2d/screen_shake/) for an
 # initial Godot Script and adpatations, plus [this tutorial]
 # (http://www.briscoe.ca/notes/camera-shake/) to add direction.
-# It works for any Node2D, not only Camera, and it's already responsive to changes in 
+# It works for any Node2D, not only Camera3D, and it's already responsive to changes in 
 # time scale (like slow motion or any other effect of this kind).
 #
 # But try to add it to nodes which the position and rotation does not change during runtime, or 
@@ -13,8 +13,8 @@
 # If you need to add to a camera or player, add a "pivot" Node2D that holds the position and 
 # rotation for the object so that you can move the pivot around. Or add a "ShakyCamera" as a child 
 # of you normal camera and this Shaker to it. In the case of the player, you can add the Shaker 
-# only to the player's skin and not to the Kinematic/RigidBody.
-tool
+# only to the player's skin and not to the Kinematic/RigidBody3D.
+@tool
 class_name eh_Shaker2D
 extends Node
 
@@ -31,23 +31,23 @@ const TIME_UNIT = 0.0001
 
 #--- public variables - order: export > normal var > onready --------------------------------------
 
-export var shake_target: NodePath = NodePath("..")
+@export var shake_target: NodePath = NodePath("..")
 
 # How quickly the shaking stops [0, 1].
-export var decay: float = 0.8  
+@export var decay: float = 0.8  
 # Maximum hor/ver shake in pixels.
-export var max_offset: Vector2 = Vector2(100, 75)  
+@export var max_offset: Vector2 = Vector2(100, 75)  
 # Maximum rotation in degrees.
-export(float, 0.0, 6.283185, 0.01) var max_roll: float = 0.1  
+@export_range(0.0, 360.0, 0.1) var max_roll: float = 0.1
 # Trauma exponent.
-export(int, 2, 3, 1) var trauma_power: int = 2
+@export_range(2,3,1) var trauma_power: int = 2
 
 #--- private variables - order: export > normal var > onready -------------------------------------
 
 # To visualize the noise properties we are using
-export var _noise_texture: NoiseTexture = null
+@export var _noise_texture: NoiseTexture2D = null
 # For smooth randomness in the shake movement.
-var _noise: OpenSimplexNoise = null
+var _noise: FastNoiseLite = null
 
 # Current shake strength. Should be a value between 0 and 1.
 var _trauma: float = 0.0
@@ -60,10 +60,18 @@ var base_offset: Vector2 = Vector2.ZERO
 var base_rotation: float = 0
 
 # Test and Debugging Variables for the editor
-var _test_trauma: float = 0.0 setget _set_test_trauma
-var _test_direction: Vector2 = Vector2.ZERO setget _set_test_direction
+var _test_trauma: float = 0.0 :
+	set = _set_test_trauma
+var _test_direction: Vector2 = Vector2.ZERO :
+	set = _set_test_direction
 
-onready var _target: CanvasItem = get_node(shake_target)
+@onready var _target: CanvasItem = get_node(shake_target)
+
+## These are just some arbitrary values to take samples for each axis at a fair amount of
+## distance from each other. I used to just use the seed like in the kid's can code linked, but
+## it doesn't work on godot 4, some huge integers (above 10.000.000) give errors, even though they 
+## are valid as seeds
+var _sampling_distance := randi_range(512, 1024)
 
 ### -----------------------------------------------------------------------------------------------
 
@@ -96,7 +104,7 @@ func _get_property_list() -> Array:
 	})
 	list.append({
 		"name": "_test_trauma",
-		"type": TYPE_REAL,
+		"type": TYPE_FLOAT,
 		"usage": PROPERTY_USAGE_SCRIPT_VARIABLE | PROPERTY_USAGE_DEFAULT,
 		"hint": PROPERTY_HINT_RANGE,
 		"hint_string": "0,1,0.01"
@@ -155,7 +163,7 @@ func _set_test_direction(value: Vector2) -> void:
 
 
 func _test_add_trauma() -> void:
-	if eh_EditorHelpers.is_editor():
+	if Engine.is_editor_hint():
 		add_trauma(_test_trauma, _test_direction)
 	else:
 		push_warning("This variable is only for tests in the editor, it doesn't work in runtime.")
@@ -163,11 +171,11 @@ func _test_add_trauma() -> void:
 
 func _handle_noise() -> void:
 	if _noise_texture == null:
-		_noise = OpenSimplexNoise.new()
+		_noise = FastNoiseLite.new()
 		_noise.seed = randi()
 		_noise.period = 4
 		_noise.octaves = 2
-		_noise_texture = NoiseTexture.new()
+		_noise_texture = NoiseTexture2D.new()
 		_noise_texture.noise = _noise
 	else:
 		_noise = _noise_texture.noise
@@ -181,30 +189,32 @@ func _update_base_values() -> void:
 		if _target.rotation != base_rotation:
 			base_rotation = _target.rotation
 	elif _target is Control:
-		if _target.rect_position != base_offset:
-			base_offset = _target.rect_position
+		if _target.position != base_offset:
+			base_offset = _target.position
 		
-		if _target.rect_rotation != base_rotation:
-			base_rotation = _target.rect_rotation
+		if _target.rotation != base_rotation:
+			base_rotation = _target.rotation
 
 
 func _shake():
 	var shake_amount = pow(_trauma, trauma_power)
 	_time += 1 * Engine.time_scale
 	
-	var rotation_factor = max_roll * shake_amount * _noise.get_noise_2d(_noise.seed, _time)
-	var translation_x_factor = \
-			max_offset.x * shake_amount * (_direction.x + _noise.get_noise_2d(_noise.seed*2, _time))
-	var translation_y_factor = \
-			max_offset.y * shake_amount * (_direction.y + _noise.get_noise_2d(_noise.seed*3, _time))
+	var rotation_factor = (
+			deg_to_rad(max_roll) * shake_amount 
+			* _noise.get_noise_2d(_sampling_distance, _time)
+	)
+	var translation_x_factor = (
+			max_offset.x * shake_amount 
+			* (_direction.x + _noise.get_noise_2d(_sampling_distance * 2, _time))
+	)
+	var translation_y_factor = (
+			max_offset.y * shake_amount 
+			* (_direction.y + _noise.get_noise_2d(_sampling_distance * 3, _time))
+	)
 	
-	if _target is Node2D:
-		_target.rotation = base_rotation + rotation_factor
-		_target.position.x = base_offset.x + translation_x_factor
-		_target.position.y = base_offset.y + translation_y_factor
-	elif _target is Control:
-		_target.rect_rotation = base_rotation + rotation_factor
-		_target.rect_position.x = base_offset.x + translation_x_factor
-		_target.rect_position.y = base_offset.y + translation_y_factor
+	_target.rotation = base_rotation + rotation_factor
+	_target.position.x = base_offset.x + translation_x_factor
+	_target.position.y = base_offset.y + translation_y_factor
 
 ### -----------------------------------------------------------------------------------------------

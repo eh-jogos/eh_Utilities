@@ -1,12 +1,14 @@
-# Useful scene for completely blocking input, can use it for things like Loading Screens,
-# waiting for server connection or when enabling Steam Overlay, for example.
-#
-# It's really usefull is it is setup as an Autoload so that you can call it from anywhere
-# and so that it's always above any screen.
-extends CanvasLayer
+@tool
+class_name eh_SceneLoadAndTransition
+extends eh_SceneLoadAndChange
+
+## Write your doc string for this file here
 
 ### Member Variables and Dependencies -------------------------------------------------------------
 #--- signals --------------------------------------------------------------------------------------
+
+signal transition_resumed
+signal wait_for_resume_changed
 
 #--- enums ----------------------------------------------------------------------------------------
 
@@ -14,42 +16,42 @@ extends CanvasLayer
 
 #--- public variables - order: export > normal var > onready --------------------------------------
 
-#--- private variables - order: export > normal var > onready -------------------------------------
+@export var wait_for_resume := false:
+	set(value):
+		var has_changed = value != wait_for_resume
+		wait_for_resume = value
+		if Engine.is_editor_hint() and is_inside_tree():
+			wait_for_resume_changed.emit()
 
-var _previous_focus: Control = null
-@onready var _blocker = $Blocker as Control
+#--- private variables - order: export > normal var > onready -------------------------------------
 
 ### -----------------------------------------------------------------------------------------------
 
 
 ### Built in Engine Methods -----------------------------------------------------------------------
 
-func _ready():
-	_blocker.hide()
-	set_process_input(false)
-
-
-func _input(event: InputEvent) -> void:
-	get_tree().set_input_as_handled()
-
 ### -----------------------------------------------------------------------------------------------
 
 
 ### Public Methods --------------------------------------------------------------------------------
 
-func activate() -> void:
-	set_process_input(true)
-	_previous_focus = _blocker.get_viewport().gui_get_focus_owner()
-	_blocker.show()
-	_blocker.grab_focus()
+func change_to_next_scene() -> void:
+	await eh_Transitions.play_transition_in()
+	
+	if _loader.is_loading():
+		loading_wait_started.emit()
+		await _loader.loading_finished
+		loading_wait_finished.emit()
+		if wait_for_resume:
+			await transition_resumed
+
+	var packed_scene: PackedScene = _loader.get_loaded_resource()
+	get_tree().change_scene_to_packed(packed_scene)
+	eh_Transitions.play_transition_out.call_deferred()
 
 
-func deactivate() -> void:
-	_blocker.hide()
-	set_process_input(false)
-	if _previous_focus != null and is_instance_valid(_previous_focus):
-		_previous_focus.grab_focus()
-		_previous_focus = null
+func resume_transition() -> void:
+	transition_resumed.emit()
 
 ### -----------------------------------------------------------------------------------------------
 

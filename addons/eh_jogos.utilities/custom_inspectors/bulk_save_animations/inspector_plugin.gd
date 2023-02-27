@@ -1,9 +1,6 @@
-# Useful scene for completely blocking input, can use it for things like Loading Screens,
-# waiting for server connection or when enabling Steam Overlay, for example.
-#
-# It's really usefull is it is setup as an Autoload so that you can call it from anywhere
-# and so that it's always above any screen.
-extends CanvasLayer
+extends EditorInspectorPlugin
+
+## Write your doc string for this file here
 
 ### Member Variables and Dependencies -------------------------------------------------------------
 #--- signals --------------------------------------------------------------------------------------
@@ -12,44 +9,33 @@ extends CanvasLayer
 
 #--- constants ------------------------------------------------------------------------------------
 
+const BULK_SAVE_PANEL = preload("res://addons/eh_jogos.utilities/custom_inspectors/bulk_save_animations/bulk_save_control.tscn")
+
 #--- public variables - order: export > normal var > onready --------------------------------------
 
-#--- private variables - order: export > normal var > onready -------------------------------------
+var parent_plugin: EditorPlugin = null
 
-var _previous_focus: Control = null
-@onready var _blocker = $Blocker as Control
+#--- private variables - order: export > normal var > onready -------------------------------------
 
 ### -----------------------------------------------------------------------------------------------
 
 
 ### Built in Engine Methods -----------------------------------------------------------------------
 
-func _ready():
-	_blocker.hide()
-	set_process_input(false)
+func _can_handle(object) -> bool:
+	return object is AnimationPlayer
 
 
-func _input(event: InputEvent) -> void:
-	get_tree().set_input_as_handled()
+func _parse_begin(object: Object) -> void:
+	var bulk_save_panel := BULK_SAVE_PANEL.instantiate()
+	bulk_save_panel.animation_player = object as AnimationPlayer
+	bulk_save_panel.editor_interface = parent_plugin.get_editor_interface()
+	add_custom_control(bulk_save_panel)
 
 ### -----------------------------------------------------------------------------------------------
 
 
 ### Public Methods --------------------------------------------------------------------------------
-
-func activate() -> void:
-	set_process_input(true)
-	_previous_focus = _blocker.get_viewport().gui_get_focus_owner()
-	_blocker.show()
-	_blocker.grab_focus()
-
-
-func deactivate() -> void:
-	_blocker.hide()
-	set_process_input(false)
-	if _previous_focus != null and is_instance_valid(_previous_focus):
-		_previous_focus.grab_focus()
-		_previous_focus = null
 
 ### -----------------------------------------------------------------------------------------------
 

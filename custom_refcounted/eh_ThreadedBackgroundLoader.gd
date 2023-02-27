@@ -5,8 +5,8 @@ extends RefCounted
 ### Member Variables and Dependencies -------------------------------------------------------------
 #--- signals --------------------------------------------------------------------------------------
 
-signal loading_progressed(progress_value)
-signal loading_finished(loaded_resource)
+signal loading_progressed(progress_value: float)
+signal loading_finished(loaded_resource: Resource)
 signal loading_safely_aborted
 
 #--- enums ----------------------------------------------------------------------------------------

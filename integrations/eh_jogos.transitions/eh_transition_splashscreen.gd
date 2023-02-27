@@ -16,6 +16,7 @@ extends "res://addons/eh_jogos.utilities/scenes/splash_screen/eh_splash_screen.g
 	set(value):
 		use_fade_out = value
 		notify_property_list_changed()
+
 var optional_transition_data: eh_TransitionData
 
 #--- private variables - order: export > normal var > onready -------------------------------------

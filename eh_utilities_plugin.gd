@@ -36,6 +36,9 @@ const PATH_AUTOLOADS = [
 
 #--- public variables - order: export > normal var > onready --------------------------------------
 
+var editor_interface: EditorInterface
+var editor_file_system: EditorFileSystem
+
 #--- private variables - order: export > normal var > onready -------------------------------------
 
 var _loaded_inspectors := {}
@@ -46,8 +49,15 @@ var _loaded_inspectors := {}
 ### Built in Engine Methods -----------------------------------------------------------------------
 
 func _enter_tree() -> void:
+	editor_interface = get_editor_interface()
+	editor_file_system = editor_interface.get_resource_filesystem()
 	_add_custom_inspectors()
 	_add_settings_property_info()
+
+
+func _ready() -> void:
+	project_settings_changed.connect(_on_project_settings_changed)
+
 
 func _exit_tree() -> void:
 	_remove_custom_inspectors()
@@ -79,10 +89,9 @@ func _add_plugin_settings() -> void:
 		if not ProjectSettings.has_setting(setting):
 			ProjectSettings.set_setting(setting, dict.value)
 	
-	get_editor_interface().get_resource_filesystem().scan()
-	
 	if Engine.is_editor_hint():
 		ProjectSettings.save()
+		editor_file_system.scan()
 
 
 func _add_settings_property_info() -> void:
@@ -95,10 +104,9 @@ func _add_settings_property_info() -> void:
 			"hint_string": dict.hint_string,
 		})
 	
-	get_editor_interface().get_resource_filesystem().scan()
-	
 	if Engine.is_editor_hint():
 		ProjectSettings.save()
+		editor_file_system.scan()
 
 
 func _remove_plugin_settings() -> void:
@@ -106,6 +114,7 @@ func _remove_plugin_settings() -> void:
 		if ProjectSettings.has_setting(setting):
 			ProjectSettings.set_setting(setting, null)
 			ProjectSettings.save()
+			editor_file_system.scan()
 
 
 func _add_custom_inspectors() -> void:
@@ -155,5 +164,21 @@ func _remove_autoloads() -> void:
 			var current_path := ProjectSettings.get_setting("autoload/%s"%[autoload_name]) as String
 			if "*%s"%[original_path] == current_path:
 				remove_autoload_singleton(autoload_name)
+
+
+func _on_project_settings_changed() -> void:
+	const PATH_INTEGRATIONS = "res://addons/eh_jogos.utilities/integrations/"
+	var plugin_integrations := DirAccess.get_directories_at(PATH_INTEGRATIONS)
+	for plugin_name in plugin_integrations:
+		var full_path := PATH_INTEGRATIONS.path_join(plugin_name).path_join(".gdignore")
+		if editor_interface.is_plugin_enabled(plugin_name):
+			if FileAccess.file_exists(full_path):
+				DirAccess.remove_absolute(full_path)
+				editor_file_system.scan()
+		else:
+			if not FileAccess.file_exists(full_path):
+				var file := FileAccess.open(full_path, FileAccess.WRITE)
+				file.store_string("teste")
+				editor_file_system.scan()
 
 ### -----------------------------------------------------------------------------------------------

@@ -19,6 +19,7 @@ extends EditorPlugin
 const PATH_CUSTOM_INSPECTORS = "res://addons/eh_jogos.utilities/custom_inspectors/"
 
 const SETTING_LOGGING_ENABLED = "eh_jogos/eh_utilities/logging_enabled"
+const SETTING_AUTOLOADS_BASE = "eh_jogos/eh_utilities/autoloads/"
 const SETTINGS = {
 	SETTING_LOGGING_ENABLED: 
 	{
@@ -52,7 +53,9 @@ func _enter_tree() -> void:
 	editor_interface = get_editor_interface()
 	editor_file_system = editor_interface.get_resource_filesystem()
 	_add_custom_inspectors()
+	_add_plugin_settings()
 	_add_settings_property_info()
+	add_tool_menu_item("Copy Script Templates from Utilities", _copy_script_templates_to_project)
 
 
 func _ready() -> void:
@@ -61,11 +64,10 @@ func _ready() -> void:
 
 func _exit_tree() -> void:
 	_remove_custom_inspectors()
+	remove_tool_menu_item("Copy Script Templates from Utilities")
 
 
 func _enable_plugin() -> void:
-	_add_plugin_settings()
-	_add_settings_property_info()
 	_add_autoloads()
 
 
@@ -88,6 +90,14 @@ func _add_plugin_settings() -> void:
 		var dict: Dictionary = SETTINGS[setting]
 		if not ProjectSettings.has_setting(setting):
 			ProjectSettings.set_setting(setting, dict.value)
+			ProjectSettings.set_initial_value(setting, dict.value)
+	
+	for data in PATH_AUTOLOADS:
+		var autoload_name = SETTING_AUTOLOADS_BASE.path_join(data[0])
+		var autoload_path = data[1]
+		if not ProjectSettings.has_setting(autoload_name):
+			ProjectSettings.set_setting(autoload_name, autoload_path)
+			ProjectSettings.set_initial_value(autoload_name, autoload_path)
 	
 	if Engine.is_editor_hint():
 		ProjectSettings.save()
@@ -102,6 +112,14 @@ func _add_settings_property_info() -> void:
 			"type": dict.type,
 			"hint": dict.hint,
 			"hint_string": dict.hint_string,
+		})
+	
+	for data in PATH_AUTOLOADS:
+		ProjectSettings.add_property_info({
+			"name": SETTING_AUTOLOADS_BASE.path_join(data[0]),
+			"type": TYPE_STRING,
+			"hint": PROPERTY_HINT_FILE,
+			"hint_string": "",
 		})
 	
 	if Engine.is_editor_hint():
@@ -166,19 +184,82 @@ func _remove_autoloads() -> void:
 				remove_autoload_singleton(autoload_name)
 
 
+func _copy_script_templates_to_project() -> void:
+	const PATH_INTERNAL_TEMPLATES = "res://addons/eh_jogos.utilities/script_templates/"
+	var destination := ProjectSettings.get_setting("editor/script/templates_search_path") as String
+	_copy_all_files(PATH_INTERNAL_TEMPLATES, destination)
+
+
+func _copy_all_files(from: String, to: String) -> void:
+	var dir := DirAccess.open(from)
+	if dir.get_open_error() != OK:
+		push_error("Could not open path. Error: %s Path: %s"%[dir.get_open_error(), from])
+		return
+	
+	dir.include_hidden = true
+	var error := dir.list_dir_begin()
+	if error != OK:
+		push_error("Could not begin listing directory. Error: %s Path: %s"%[error, from])
+		return
+	
+	if not dir.dir_exists(to):
+		error = dir.make_dir_recursive(to)
+		if error != OK:
+			push_error("Destination doesn't exist and wasn't possible to create. Path: %s"%[to])
+			return
+	
+	var current_element := dir.get_next()
+	while not current_element.is_empty():
+		if dir.current_is_dir():
+			var new_folder := from.path_join(current_element)
+			var new_destiny := to.path_join(current_element)
+			_copy_all_files(new_folder, new_destiny)
+		else:
+			var full_source := from.path_join(current_element)
+			var full_destination := to.path_join(current_element)
+			print("Copying: %s to: %s"%[full_source, full_destination])
+			error = dir.copy(full_source, full_destination)
+			if error != OK:
+				push_error("error copying file: %s"%[error])
+		current_element = dir.get_next()
+	
+	dir.list_dir_end()
+
+
 func _on_project_settings_changed() -> void:
+	_update_plugin_integrations()
+	_update_autoloads()
+
+
+func _update_plugin_integrations() -> void:
 	const PATH_INTEGRATIONS = "res://addons/eh_jogos.utilities/integrations/"
 	var plugin_integrations := DirAccess.get_directories_at(PATH_INTEGRATIONS)
+	var has_changed := false
 	for plugin_name in plugin_integrations:
-		var full_path := PATH_INTEGRATIONS.path_join(plugin_name).path_join(".gdignore")
+		var ignore_path := PATH_INTEGRATIONS.path_join(plugin_name).path_join(".gdignore")
 		if editor_interface.is_plugin_enabled(plugin_name):
-			if FileAccess.file_exists(full_path):
-				DirAccess.remove_absolute(full_path)
-				editor_file_system.scan()
+			if FileAccess.file_exists(ignore_path):
+				DirAccess.remove_absolute(ignore_path)
+				has_changed = true
 		else:
-			if not FileAccess.file_exists(full_path):
-				var file := FileAccess.open(full_path, FileAccess.WRITE)
-				file.store_string("teste")
-				editor_file_system.scan()
+			if not FileAccess.file_exists(ignore_path):
+				var file := FileAccess.open(ignore_path, FileAccess.WRITE)
+				file.store_string("")
+				has_changed = true
+	
+	if has_changed:
+		editor_file_system.scan()
+
+
+func _update_autoloads() -> void:
+	for autoload_data in PATH_AUTOLOADS:
+		var autoload_name := autoload_data[0] as String
+		var settings_name := SETTING_AUTOLOADS_BASE.path_join(autoload_name)
+		var settings_path := ProjectSettings.get_setting(settings_name) as String
+		if ProjectSettings.has_setting("autoload/%s"%[autoload_name]):
+			var current_path := ProjectSettings.get_setting("autoload/%s"%[autoload_name]) as String
+			if "*%s"%[settings_path] != current_path:
+				remove_autoload_singleton(autoload_name)
+				add_autoload_singleton(autoload_name, settings_path)
 
 ### -----------------------------------------------------------------------------------------------

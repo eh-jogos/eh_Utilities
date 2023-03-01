@@ -55,6 +55,7 @@ func _enter_tree() -> void:
 	_add_custom_inspectors()
 	_add_plugin_settings()
 	_add_settings_property_info()
+	add_tool_menu_item("Copy Script Templates from Utilities", _copy_script_templates_to_project)
 
 
 func _ready() -> void:
@@ -63,6 +64,7 @@ func _ready() -> void:
 
 func _exit_tree() -> void:
 	_remove_custom_inspectors()
+	remove_tool_menu_item("Copy Script Templates from Utilities")
 
 
 func _enable_plugin() -> void:
@@ -180,6 +182,48 @@ func _remove_autoloads() -> void:
 			var current_path := ProjectSettings.get_setting("autoload/%s"%[autoload_name]) as String
 			if "*%s"%[original_path] == current_path:
 				remove_autoload_singleton(autoload_name)
+
+
+func _copy_script_templates_to_project() -> void:
+	const PATH_INTERNAL_TEMPLATES = "res://addons/eh_jogos.utilities/script_templates/"
+	var destination := ProjectSettings.get_setting("editor/script/templates_search_path") as String
+	_copy_all_files(PATH_INTERNAL_TEMPLATES, destination)
+
+
+func _copy_all_files(from: String, to: String) -> void:
+	var dir := DirAccess.open(from)
+	if dir.get_open_error() != OK:
+		push_error("Could not open path. Error: %s Path: %s"%[dir.get_open_error(), from])
+		return
+	
+	dir.include_hidden = true
+	var error := dir.list_dir_begin()
+	if error != OK:
+		push_error("Could not begin listing directory. Error: %s Path: %s"%[error, from])
+		return
+	
+	if not dir.dir_exists(to):
+		error = dir.make_dir_recursive(to)
+		if error != OK:
+			push_error("Destination doesn't exist and wasn't possible to create. Path: %s"%[to])
+			return
+	
+	var current_element := dir.get_next()
+	while not current_element.is_empty():
+		if dir.current_is_dir():
+			var new_folder := from.path_join(current_element)
+			var new_destiny := to.path_join(current_element)
+			_copy_all_files(new_folder, new_destiny)
+		else:
+			var full_source := from.path_join(current_element)
+			var full_destination := to.path_join(current_element)
+			print("Copying: %s to: %s"%[full_source, full_destination])
+			error = dir.copy(full_source, full_destination)
+			if error != OK:
+				push_error("error copying file: %s"%[error])
+		current_element = dir.get_next()
+	
+	dir.list_dir_end()
 
 
 func _on_project_settings_changed() -> void:

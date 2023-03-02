@@ -126,7 +126,8 @@ func _flush_log_to_file() -> void:
 
 
 func _is_logging_enabled() -> bool:
-	return ProjectSettings.get_setting(eh_Utilities.SETTING_LOGGING_ENABLED)
+	var default_value = eh_Utilities.get_default_setting(eh_Utilities.SETTING_LOGGING_ENABLED)
+	return ProjectSettings.get_setting(eh_Utilities.SETTING_LOGGING_ENABLED, default_value)
 
 
 func _has_created_log_file() -> bool:

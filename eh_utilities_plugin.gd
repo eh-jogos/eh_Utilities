@@ -80,6 +80,9 @@ func _disable_plugin() -> void:
 
 ### Public Methods --------------------------------------------------------------------------------
 
+static func get_default_setting(setting_name: String) -> Variant:
+	return SETTINGS[setting_name].value
+
 ### -----------------------------------------------------------------------------------------------
 
 

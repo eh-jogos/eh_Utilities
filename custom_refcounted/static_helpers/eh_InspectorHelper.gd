@@ -63,6 +63,10 @@ static func get_prop_dict(
 	}
 
 
+static func get_group_dict(p_name: StringName, p_hint_string: String) -> Dictionary:
+	return get_prop_dict(p_name, TYPE_NIL, PROPERTY_HINT_NONE, p_hint_string, PROPERTY_USAGE_GROUP)
+
+
 static func get_enum_hint_for(
 		string_array: PackedStringArray, 
 		should_capitalize: = true

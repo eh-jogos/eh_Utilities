@@ -100,10 +100,20 @@ static func get_blend_position_paths_from(animation_tree: AnimationTree) -> Arra
 	var blend_positions = []
 	
 	for property in animation_tree.get_property_list():
-		if property.usage >= 7 and property.name.ends_with("blend_position"):
+		if property.usage >= PROPERTY_USAGE_DEFAULT and property.name.ends_with("blend_position"):
 			blend_positions.append(property.name)
 	
 	return blend_positions
+
+
+static func get_class_name_string_for(script_path: String) -> String:
+	var custom_classes := ProjectSettings.get_global_class_list()
+	var name := ""
+	for dictionary in custom_classes:
+		if dictionary.path == script_path:
+			name = dictionary["class"]
+			break
+	return name
 
 ### -----------------------------------------------------------------------------------------------
 

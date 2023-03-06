@@ -85,7 +85,7 @@ static func add_debug_camera2D_to(
 ) -> void:
 	var camera: = Camera2D.new()
 	camera.name = "DebugCamera2D"
-	camera.current = true
+	camera.enabled = true
 	camera.zoom = zoom_level
 	if percent_offset != Vector2(INF, INF):
 		var viewport_size = node2D.get_viewport_rect().size

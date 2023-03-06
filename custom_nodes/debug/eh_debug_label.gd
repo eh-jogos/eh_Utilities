@@ -13,6 +13,8 @@ extends Label
 
 #--- public variables - order: export > normal var > onready --------------------------------------
 
+@export var max_width := 0
+
 ## Node that will be used as base to access properties or methods.
 @export var path_node: NodePath:
 	set(value):
@@ -41,6 +43,9 @@ func _ready() -> void:
 	if Engine.is_editor_hint():
 		eh_EditorHelpers.disable_all_processing(self)
 		return
+	
+	if max_width == 0:
+		max_width = get_viewport_rect().size.x
 
 
 func _physics_process(_delta: float) -> void:
@@ -60,6 +65,10 @@ func _physics_process(_delta: float) -> void:
 		var msg := _get_message_for_value("%s()"%[method], value)
 		messages.append(msg)
 	text = "\n".join(messages)
+	
+	if size.x > max_width:
+		custom_minimum_size.x = max_width
+		autowrap_mode = TextServer.AUTOWRAP_WORD
 
 
 func _get_message_for_value(p_name: String, p_value: Variant) -> String:

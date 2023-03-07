@@ -37,6 +37,16 @@ static func is_standalone_run(node: Node) -> bool:
 	return node.is_inside_tree() and node.get_tree().current_scene == node
 
 
+static func is_extenal_resource(p_resource: Resource) -> bool:
+	var value = false
+	
+	if not p_resource.resource_path.is_empty():
+		if p_resource.resource_path.find("::") == -1:
+			value = true
+	
+	return value
+
+
 static func has_editor() -> bool:
 	return OS.has_feature("editor")
 

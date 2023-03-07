@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://dd5vat6vcotrc"]
+[gd_scene load_steps=8 format=3 uid="uid://cgpgbsqpjf02t"]
 
 [ext_resource type="Script" path="res://addons/eh_jogos.utilities/custom_nodes/2d/eh_Shaker2D.gd" id="3"]
 [ext_resource type="Texture2D" uid="uid://b6k24asw0wa2k" path="res://icon.svg" id="3_rvjjd"]
@@ -38,7 +38,6 @@ _data = {
 [node name="Camera2D" type="Camera2D" parent="."]
 position = Vector2(641.488, 359.624)
 scale = Vector2(3.1875, 3.1875)
-current = true
 
 [node name="eh_Shaker2D" type="Node" parent="Camera2D"]
 script = ExtResource("3")

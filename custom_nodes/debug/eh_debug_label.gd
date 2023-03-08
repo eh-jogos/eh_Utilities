@@ -46,6 +46,11 @@ func _ready() -> void:
 	
 	if max_width == 0:
 		max_width = get_viewport_rect().size.x
+	
+	if not is_visible_in_tree():
+		set_physics_process(false)
+	
+	eh_EditorHelpers.connect_between(visibility_changed, _on_visibility_changed)
 
 
 func _physics_process(_delta: float) -> void:
@@ -100,5 +105,8 @@ func _get_configuration_warnings() -> PackedStringArray:
 
 
 ### Private Methods -------------------------------------------------------------------------------
+
+func _on_visibility_changed() -> void:
+	set_physics_process(is_visible_in_tree())
 
 ### -----------------------------------------------------------------------------------------------

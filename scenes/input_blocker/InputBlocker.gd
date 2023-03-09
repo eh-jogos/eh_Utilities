@@ -37,9 +37,12 @@ func _input(event: InputEvent) -> void:
 
 ### Public Methods --------------------------------------------------------------------------------
 
-func activate() -> void:
+func activate(p_previous_focus: Control = null) -> void:
 	set_process_input(true)
-	_previous_focus = _blocker.get_viewport().gui_get_focus_owner()
+	if p_previous_focus == null:
+		_previous_focus = _blocker.get_viewport().gui_get_focus_owner()
+	else:
+		_previous_focus = p_previous_focus
 	_blocker.show()
 	_blocker.grab_focus()
 

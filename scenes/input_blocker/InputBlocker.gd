@@ -30,7 +30,7 @@ func _ready():
 
 
 func _input(event: InputEvent) -> void:
-	get_tree().set_input_as_handled()
+	get_viewport().set_input_as_handled()
 
 ### -----------------------------------------------------------------------------------------------
 

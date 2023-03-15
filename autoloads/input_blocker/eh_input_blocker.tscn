@@ -1,6 +1,6 @@
-[gd_scene load_steps=2 format=3 uid="uid://1ly22dygp3xh"]
+[gd_scene load_steps=2 format=3]
 
-[ext_resource type="Script" path="res://addons/eh_jogos.utilities/scenes/input_blocker/InputBlocker.gd" id="1"]
+[ext_resource type="Script" path="res://addons/eh_jogos.utilities/autoloads/input_blocker/eh_input_blocker.gd" id="1"]
 
 [node name="InputBlocker" type="CanvasLayer"]
 layer = 128
@@ -11,6 +11,8 @@ layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 focus_neighbor_left = NodePath(".")
 focus_neighbor_top = NodePath(".")
 focus_neighbor_right = NodePath(".")

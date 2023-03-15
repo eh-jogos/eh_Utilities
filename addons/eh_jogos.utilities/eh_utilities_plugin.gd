@@ -17,11 +17,20 @@ extends EditorPlugin
 #--- constants ------------------------------------------------------------------------------------
 
 const PATH_CUSTOM_INSPECTORS = "res://addons/eh_jogos.utilities/custom_inspectors/"
+const PATH_AUTOLOADS_FOLDER = "res://addons/eh_jogos.utilities/autoloads/"
 
-const SETTING_LOGGING_ENABLED = "eh_jogos/eh_utilities/logging_enabled"
 const SETTING_AUTOLOADS_BASE = "eh_jogos/eh_utilities/autoloads/"
+const SETTING_LOGGING_ENABLED = "eh_jogos/eh_utilities/autoloads/eh_DebugLogger_enabled"
+const SETTING_INPUT_BLOCKING_ENABLED = "eh_jogos/eh_utilities/autoloads/eh_InputBlocker_enabled"
 const SETTINGS = {
 	SETTING_LOGGING_ENABLED: 
+	{
+		value = true, 
+		type = TYPE_BOOL, 
+		hint = PROPERTY_HINT_NONE, 
+		hint_string = ""
+	},
+	SETTING_INPUT_BLOCKING_ENABLED: 
 	{
 		value = true, 
 		type = TYPE_BOOL, 
@@ -31,7 +40,8 @@ const SETTINGS = {
 }
 
 const PATH_AUTOLOADS = [
-	["eh_DebugLogger", "res://addons/eh_jogos.utilities/autoloads/debug_logger/eh_debug_logger.tscn"],
+	["eh_DebugLogger", "debug_logger/eh_debug_logger.tscn"],
+	["eh_InputBlocker", "input_blocker/eh_input_blocker.tscn"]
 ]
 
 
@@ -59,7 +69,7 @@ func _enter_tree() -> void:
 
 
 func _ready() -> void:
-	project_settings_changed.connect(_on_project_settings_changed)
+	eh_EditorHelpers.connect_between(project_settings_changed, _on_project_settings_changed)
 
 
 func _exit_tree() -> void:
@@ -68,72 +78,29 @@ func _exit_tree() -> void:
 
 
 func _enable_plugin() -> void:
+	eh_EditorHelpers.connect_between(project_settings_changed, _on_project_settings_changed)
 	_add_autoloads()
 
 
 func _disable_plugin() -> void:
-	_remove_plugin_settings()
+	eh_EditorHelpers.disconnect_between(project_settings_changed, _on_project_settings_changed)
 	_remove_autoloads()
+	_remove_plugin_settings()
 
 ### -----------------------------------------------------------------------------------------------
 
 
 ### Public Methods --------------------------------------------------------------------------------
 
+static func get_default_setting(setting_name: String) -> Variant:
+	return SETTINGS[setting_name].value
+
 ### -----------------------------------------------------------------------------------------------
 
 
 ### Private Methods -------------------------------------------------------------------------------
 
-func _add_plugin_settings() -> void:
-	for setting in SETTINGS:
-		var dict: Dictionary = SETTINGS[setting]
-		if not ProjectSettings.has_setting(setting):
-			ProjectSettings.set_setting(setting, dict.value)
-			ProjectSettings.set_initial_value(setting, dict.value)
-	
-	for data in PATH_AUTOLOADS:
-		var autoload_name = SETTING_AUTOLOADS_BASE.path_join(data[0])
-		var autoload_path = data[1]
-		if not ProjectSettings.has_setting(autoload_name):
-			ProjectSettings.set_setting(autoload_name, autoload_path)
-			ProjectSettings.set_initial_value(autoload_name, autoload_path)
-	
-	if Engine.is_editor_hint():
-		ProjectSettings.save()
-		editor_file_system.scan()
-
-
-func _add_settings_property_info() -> void:
-	for setting in SETTINGS:
-		var dict: Dictionary = SETTINGS[setting]
-		ProjectSettings.add_property_info({
-			"name": setting,
-			"type": dict.type,
-			"hint": dict.hint,
-			"hint_string": dict.hint_string,
-		})
-	
-	for data in PATH_AUTOLOADS:
-		ProjectSettings.add_property_info({
-			"name": SETTING_AUTOLOADS_BASE.path_join(data[0]),
-			"type": TYPE_STRING,
-			"hint": PROPERTY_HINT_FILE,
-			"hint_string": "",
-		})
-	
-	if Engine.is_editor_hint():
-		ProjectSettings.save()
-		editor_file_system.scan()
-
-
-func _remove_plugin_settings() -> void:
-	for setting in SETTINGS:
-		if ProjectSettings.has_setting(setting):
-			ProjectSettings.set_setting(setting, null)
-			ProjectSettings.save()
-			editor_file_system.scan()
-
+####### Custom Inspectors -------------------------------------------------------------------------
 
 func _add_custom_inspectors() -> void:
 	if not DirAccess.dir_exists_absolute(PATH_CUSTOM_INSPECTORS):
@@ -165,12 +132,105 @@ func _remove_custom_inspectors() -> void:
 	for inspector in _loaded_inspectors.values():
 		remove_inspector_plugin(inspector)
 
+####### End of Custom Inspectors ------------------------------------------------------------------
+
+####### Project Settings --------------------------------------------------------------------------
+
+func _add_plugin_settings() -> void:
+	for setting in SETTINGS:
+		var dict: Dictionary = SETTINGS[setting]
+		if not ProjectSettings.has_setting(setting):
+			ProjectSettings.set_setting(setting, dict.value)
+			ProjectSettings.set_initial_value(setting, dict.value)
+	
+	for data in PATH_AUTOLOADS:
+		var autoload_name = SETTING_AUTOLOADS_BASE.path_join(data[0])
+		var autoload_path = PATH_AUTOLOADS_FOLDER.path_join(data[1])
+		
+		if not ProjectSettings.has_setting(autoload_name):
+			ProjectSettings.set_setting(autoload_name, autoload_path)
+			ProjectSettings.set_initial_value(autoload_name, autoload_path)
+		
+	
+	if Engine.is_editor_hint():
+		ProjectSettings.save()
+		editor_file_system.scan()
+
+
+func _add_settings_property_info() -> void:
+	for setting in SETTINGS:
+		var dict: Dictionary = SETTINGS[setting]
+		ProjectSettings.add_property_info({
+			"name": setting,
+			"type": dict.type,
+			"hint": dict.hint,
+			"hint_string": dict.hint_string,
+		})
+	
+	for data in PATH_AUTOLOADS:
+		var autoload_name = SETTING_AUTOLOADS_BASE.path_join(data[0])
+		ProjectSettings.add_property_info({
+			"name": autoload_name,
+			"type": TYPE_STRING,
+			"hint": PROPERTY_HINT_FILE,
+			"hint_string": "",
+		})
+	
+	if Engine.is_editor_hint():
+		ProjectSettings.save()
+		editor_file_system.scan()
+
+
+func _remove_plugin_settings() -> void:
+	var has_changed := false
+	for setting in SETTINGS:
+		if ProjectSettings.has_setting(setting):
+			ProjectSettings.set_setting(setting, null)
+			has_changed = true
+	
+	for data in PATH_AUTOLOADS:
+		var autoload_setting = SETTING_AUTOLOADS_BASE.path_join(data[0])
+		if ProjectSettings.has_setting(autoload_setting):
+			ProjectSettings.set_setting(autoload_setting, null)
+			has_changed = true
+	
+	if has_changed:
+		ProjectSettings.save()
+		editor_file_system.scan()
+
+func _on_project_settings_changed() -> void:
+	_update_plugin_integrations()
+	_update_autoloads()
+
+
+func _update_plugin_integrations() -> void:
+	const PATH_INTEGRATIONS = "res://addons/eh_jogos.utilities/integrations/"
+	var plugin_integrations := DirAccess.get_directories_at(PATH_INTEGRATIONS)
+	var has_changed := false
+	for plugin_name in plugin_integrations:
+		var ignore_path := PATH_INTEGRATIONS.path_join(plugin_name).path_join(".gdignore")
+		if editor_interface.is_plugin_enabled(plugin_name):
+			if FileAccess.file_exists(ignore_path):
+				DirAccess.remove_absolute(ignore_path)
+				has_changed = true
+		else:
+			if not FileAccess.file_exists(ignore_path):
+				var file := FileAccess.open(ignore_path, FileAccess.WRITE)
+				file.store_string("")
+				has_changed = true
+	
+	if has_changed:
+		editor_file_system.scan()
+
+####### END OF Project Settings -------------------------------------------------------------------
+
+####### Autoloads ---------------------------------------------------------------------------------
 
 func _add_autoloads() -> void:
 	for autoload_data in PATH_AUTOLOADS:
 		var autoload_name = autoload_data[0]
 		if not ProjectSettings.has_setting("autoload/%s"%[autoload_name]):
-			var path = autoload_data[1]
+			var path = PATH_AUTOLOADS_FOLDER.path_join(autoload_data[1])
 			add_autoload_singleton(autoload_name, path)
 
 
@@ -178,11 +238,48 @@ func _remove_autoloads() -> void:
 	for autoload_data in PATH_AUTOLOADS:
 		var autoload_name = autoload_data[0]
 		if ProjectSettings.has_setting("autoload/%s"%[autoload_name]):
-			var original_path := autoload_data[1] as String
+			var original_path := PATH_AUTOLOADS_FOLDER.path_join(autoload_data[1]) as String
 			var current_path := ProjectSettings.get_setting("autoload/%s"%[autoload_name]) as String
 			if "*%s"%[original_path] == current_path:
 				remove_autoload_singleton(autoload_name)
 
+
+func _update_autoloads() -> void:
+	for autoload_data in PATH_AUTOLOADS:
+		var autoload_name := autoload_data[0] as String
+		var settings_name := SETTING_AUTOLOADS_BASE.path_join(autoload_name)
+		var settings_path := ProjectSettings.get_setting(settings_name, "") as String
+		
+		var autoload_enabled := "%s_enabled"%[settings_name]
+		if _is_disabled_but_has_autoload(autoload_enabled, autoload_name):
+			remove_autoload_singleton(autoload_name)
+			ProjectSettings.set_setting(settings_name, null)
+		elif _is_enabled_but_has_no_autoload(autoload_enabled, autoload_name):
+			settings_path = PATH_AUTOLOADS_FOLDER.path_join(autoload_data[1])
+			add_autoload_singleton(autoload_name, settings_path)
+			ProjectSettings.set_setting(settings_name, settings_path)
+		
+		if ProjectSettings.has_setting("autoload/%s"%[autoload_name]):
+			var current_path := ProjectSettings.get_setting("autoload/%s"%[autoload_name]) as String
+			if "*%s"%[settings_path] != current_path:
+				remove_autoload_singleton(autoload_name)
+				add_autoload_singleton(autoload_name, settings_path)
+
+
+func _is_disabled_but_has_autoload(enabled_setting: String, autoload_name: String) -> bool:
+	var enabled := ProjectSettings.get_setting(enabled_setting, true)
+	var has_autoload := ProjectSettings.has_setting("autoload/%s"%[autoload_name])
+	return not enabled and has_autoload
+
+
+func _is_enabled_but_has_no_autoload(enabled_setting: String, autoload_name: String) -> bool:
+	var enabled := ProjectSettings.get_setting(enabled_setting, true)
+	var has_autoload := ProjectSettings.has_setting("autoload/%s"%[autoload_name])
+	return enabled and not has_autoload
+
+####### END OF Autoloads --------------------------------------------------------------------------
+
+####### Tool Menu items ---------------------------------------------------------------------------
 
 func _copy_script_templates_to_project() -> void:
 	const PATH_INTERNAL_TEMPLATES = "res://addons/eh_jogos.utilities/script_templates/"
@@ -225,41 +322,6 @@ func _copy_all_files(from: String, to: String) -> void:
 	
 	dir.list_dir_end()
 
-
-func _on_project_settings_changed() -> void:
-	_update_plugin_integrations()
-	_update_autoloads()
-
-
-func _update_plugin_integrations() -> void:
-	const PATH_INTEGRATIONS = "res://addons/eh_jogos.utilities/integrations/"
-	var plugin_integrations := DirAccess.get_directories_at(PATH_INTEGRATIONS)
-	var has_changed := false
-	for plugin_name in plugin_integrations:
-		var ignore_path := PATH_INTEGRATIONS.path_join(plugin_name).path_join(".gdignore")
-		if editor_interface.is_plugin_enabled(plugin_name):
-			if FileAccess.file_exists(ignore_path):
-				DirAccess.remove_absolute(ignore_path)
-				has_changed = true
-		else:
-			if not FileAccess.file_exists(ignore_path):
-				var file := FileAccess.open(ignore_path, FileAccess.WRITE)
-				file.store_string("")
-				has_changed = true
-	
-	if has_changed:
-		editor_file_system.scan()
-
-
-func _update_autoloads() -> void:
-	for autoload_data in PATH_AUTOLOADS:
-		var autoload_name := autoload_data[0] as String
-		var settings_name := SETTING_AUTOLOADS_BASE.path_join(autoload_name)
-		var settings_path := ProjectSettings.get_setting(settings_name) as String
-		if ProjectSettings.has_setting("autoload/%s"%[autoload_name]):
-			var current_path := ProjectSettings.get_setting("autoload/%s"%[autoload_name]) as String
-			if "*%s"%[settings_path] != current_path:
-				remove_autoload_singleton(autoload_name)
-				add_autoload_singleton(autoload_name, settings_path)
+####### END OF Tool Menu items --------------------------------------------------------------------
 
 ### -----------------------------------------------------------------------------------------------

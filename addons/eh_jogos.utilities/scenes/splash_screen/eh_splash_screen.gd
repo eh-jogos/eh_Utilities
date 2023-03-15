@@ -56,7 +56,7 @@ func _process_splash_animations() -> void:
 	
 	for node in splash_animations:
 		node.hide()
-		if node is eh_eh_SplashAnimationLoading:
+		if node is eh_SplashAnimationLoading:
 			node.loader = _loader
 	
 	for node in splash_animations:

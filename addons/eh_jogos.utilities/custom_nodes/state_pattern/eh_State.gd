@@ -41,7 +41,6 @@ func _ready() -> void:
 	
 	_incoming_connections = get_incoming_connections()
 	_disconnect_signals()
-	await owner.ready
 
 ### -----------------------------------------------------------------------------------------------
 

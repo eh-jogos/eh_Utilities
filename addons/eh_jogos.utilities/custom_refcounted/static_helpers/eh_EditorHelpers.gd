@@ -37,6 +37,16 @@ static func is_standalone_run(node: Node) -> bool:
 	return node.is_inside_tree() and node.get_tree().current_scene == node
 
 
+static func is_extenal_resource(p_resource: Resource) -> bool:
+	var value = false
+	
+	if not p_resource.resource_path.is_empty():
+		if p_resource.resource_path.find("::") == -1:
+			value = true
+	
+	return value
+
+
 static func has_editor() -> bool:
 	return OS.has_feature("editor")
 
@@ -85,7 +95,7 @@ static func add_debug_camera2D_to(
 ) -> void:
 	var camera: = Camera2D.new()
 	camera.name = "DebugCamera2D"
-	camera.current = true
+	camera.enabled = true
 	camera.zoom = zoom_level
 	if percent_offset != Vector2(INF, INF):
 		var viewport_size = node2D.get_viewport_rect().size
@@ -100,10 +110,20 @@ static func get_blend_position_paths_from(animation_tree: AnimationTree) -> Arra
 	var blend_positions = []
 	
 	for property in animation_tree.get_property_list():
-		if property.usage >= 7 and property.name.ends_with("blend_position"):
+		if property.usage >= PROPERTY_USAGE_DEFAULT and property.name.ends_with("blend_position"):
 			blend_positions.append(property.name)
 	
 	return blend_positions
+
+
+static func get_class_name_string_for(script_path: String) -> String:
+	var custom_classes := ProjectSettings.get_global_class_list()
+	var name := ""
+	for dictionary in custom_classes:
+		if dictionary.path == script_path:
+			name = dictionary["class"]
+			break
+	return name
 
 ### -----------------------------------------------------------------------------------------------
 

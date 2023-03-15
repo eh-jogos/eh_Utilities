@@ -1,5 +1,5 @@
 @tool
-class_name eh_eh_SplashAnimationLoading
+class_name eh_SplashAnimationLoading
 extends eh_SplashAnimation
 
 ## Write your doc string for this file here

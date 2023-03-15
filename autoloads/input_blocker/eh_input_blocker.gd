@@ -34,19 +34,20 @@ func _ready():
 
 
 func _input(event: InputEvent) -> void:
-	get_viewport().set_input_as_handled()
+	if not event is InputEventMouse:
+		get_viewport().set_input_as_handled()
 
 ### -----------------------------------------------------------------------------------------------
 
 
 ### Public Methods --------------------------------------------------------------------------------
 
-func activate(p_previous_focus: Control = null, custom_layer: int = INVALID_LAYER) -> void:
+func activate(custom_layer: int = INVALID_LAYER, p_previous_focus: Control = null) -> void:
 	if custom_layer != INVALID_LAYER:
 		_backup_layer = layer
 		layer = custom_layer
 	
-	set_process_input(true)
+	set_process_input.call_deferred(true)
 	if p_previous_focus == null:
 		_previous_focus = _blocker.get_viewport().gui_get_focus_owner()
 	else:

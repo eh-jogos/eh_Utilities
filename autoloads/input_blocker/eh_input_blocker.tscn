@@ -1,4 +1,4 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=2 format=3 uid="uid://62we4y704k3"]
 
 [ext_resource type="Script" path="res://addons/eh_jogos.utilities/autoloads/input_blocker/eh_input_blocker.gd" id="1"]
 

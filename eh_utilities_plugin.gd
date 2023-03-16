@@ -6,7 +6,6 @@
 # is activated or not, so things like the helpers in the static folder will work just as usual,
 # but the custom nodes and custom resources will have their workflow hindered.
 @tool
-class_name eh_Utilities
 extends EditorPlugin
 
 ### Member Variables and Dependencies -------------------------------------------------------------
@@ -15,29 +14,6 @@ extends EditorPlugin
 #--- enums ----------------------------------------------------------------------------------------
 
 #--- constants ------------------------------------------------------------------------------------
-
-const PATH_CUSTOM_INSPECTORS = "res://addons/eh_jogos.utilities/custom_inspectors/"
-const PATH_AUTOLOADS_FOLDER = "res://addons/eh_jogos.utilities/autoloads/"
-
-const SETTING_AUTOLOADS_BASE = "eh_jogos/eh_utilities/autoloads/"
-const SETTING_LOGGING_ENABLED = "eh_jogos/eh_utilities/autoloads/eh_DebugLogger_enabled"
-const SETTING_INPUT_BLOCKING_ENABLED = "eh_jogos/eh_utilities/autoloads/eh_InputBlocker_enabled"
-const SETTINGS = {
-	SETTING_LOGGING_ENABLED: 
-	{
-		value = true, 
-		type = TYPE_BOOL, 
-		hint = PROPERTY_HINT_NONE, 
-		hint_string = ""
-	},
-	SETTING_INPUT_BLOCKING_ENABLED: 
-	{
-		value = true, 
-		type = TYPE_BOOL, 
-		hint = PROPERTY_HINT_NONE, 
-		hint_string = ""
-	},
-}
 
 const PATH_AUTOLOADS = [
 	["eh_DebugLogger", "debug_logger/eh_debug_logger.tscn"],
@@ -70,6 +46,7 @@ func _enter_tree() -> void:
 
 func _ready() -> void:
 	eh_EditorHelpers.connect_between(project_settings_changed, _on_project_settings_changed)
+	eh_EditorHelpers.connect_between(resource_saved, _on_resource_saved)
 
 
 func _exit_tree() -> void:
@@ -92,29 +69,31 @@ func _disable_plugin() -> void:
 
 ### Public Methods --------------------------------------------------------------------------------
 
-static func get_default_setting(setting_name: String) -> Variant:
-	return SETTINGS[setting_name].value
-
 ### -----------------------------------------------------------------------------------------------
 
 
 ### Private Methods -------------------------------------------------------------------------------
 
+func _on_resource_saved(resource: Resource) -> void:
+	print("%s | path: %s"%[resource, resource.resource_path])
+	pass
+
+
 ####### Custom Inspectors -------------------------------------------------------------------------
 
 func _add_custom_inspectors() -> void:
-	if not DirAccess.dir_exists_absolute(PATH_CUSTOM_INSPECTORS):
-		var error_msg = "Path Doesn't exists: %s"%[PATH_CUSTOM_INSPECTORS]
+	if not DirAccess.dir_exists_absolute(eh_Utilities.PATH_CUSTOM_INSPECTORS):
+		var error_msg = "Path Doesn't exists: %s"%[eh_Utilities.PATH_CUSTOM_INSPECTORS]
 		push_error(error_msg)
 	
-	var dir := DirAccess.open(PATH_CUSTOM_INSPECTORS)
+	var dir := DirAccess.open(eh_Utilities.PATH_CUSTOM_INSPECTORS)
 	for folder_name in dir.get_directories():
 		_load_custom_inspector_from(folder_name)
 
 
 func _load_custom_inspector_from(folder: String) -> void:
 	const PATH_SCRIPT = "inspector_plugin.gd"
-	var full_path := PATH_CUSTOM_INSPECTORS.path_join(folder).path_join(PATH_SCRIPT)
+	var full_path := eh_Utilities.PATH_CUSTOM_INSPECTORS.path_join(folder).path_join(PATH_SCRIPT)
 	if ResourceLoader.exists(full_path):
 		var custom_inspector := load(full_path).new() as EditorInspectorPlugin
 		add_inspector_plugin(custom_inspector)
@@ -137,15 +116,15 @@ func _remove_custom_inspectors() -> void:
 ####### Project Settings --------------------------------------------------------------------------
 
 func _add_plugin_settings() -> void:
-	for setting in SETTINGS:
-		var dict: Dictionary = SETTINGS[setting]
+	for setting in eh_Utilities.SETTINGS:
+		var dict: Dictionary = eh_Utilities.SETTINGS[setting]
 		if not ProjectSettings.has_setting(setting):
 			ProjectSettings.set_setting(setting, dict.value)
 			ProjectSettings.set_initial_value(setting, dict.value)
 	
 	for data in PATH_AUTOLOADS:
-		var autoload_name = SETTING_AUTOLOADS_BASE.path_join(data[0])
-		var autoload_path = PATH_AUTOLOADS_FOLDER.path_join(data[1])
+		var autoload_name = eh_Utilities.SETTING_AUTOLOADS_BASE.path_join(data[0])
+		var autoload_path = eh_Utilities.PATH_AUTOLOADS_FOLDER.path_join(data[1])
 		
 		if not ProjectSettings.has_setting(autoload_name):
 			ProjectSettings.set_setting(autoload_name, autoload_path)
@@ -158,8 +137,8 @@ func _add_plugin_settings() -> void:
 
 
 func _add_settings_property_info() -> void:
-	for setting in SETTINGS:
-		var dict: Dictionary = SETTINGS[setting]
+	for setting in eh_Utilities.SETTINGS:
+		var dict: Dictionary = eh_Utilities.SETTINGS[setting]
 		ProjectSettings.add_property_info({
 			"name": setting,
 			"type": dict.type,
@@ -168,7 +147,7 @@ func _add_settings_property_info() -> void:
 		})
 	
 	for data in PATH_AUTOLOADS:
-		var autoload_name = SETTING_AUTOLOADS_BASE.path_join(data[0])
+		var autoload_name = eh_Utilities.SETTING_AUTOLOADS_BASE.path_join(data[0])
 		ProjectSettings.add_property_info({
 			"name": autoload_name,
 			"type": TYPE_STRING,
@@ -183,13 +162,13 @@ func _add_settings_property_info() -> void:
 
 func _remove_plugin_settings() -> void:
 	var has_changed := false
-	for setting in SETTINGS:
+	for setting in eh_Utilities.SETTINGS:
 		if ProjectSettings.has_setting(setting):
 			ProjectSettings.set_setting(setting, null)
 			has_changed = true
 	
 	for data in PATH_AUTOLOADS:
-		var autoload_setting = SETTING_AUTOLOADS_BASE.path_join(data[0])
+		var autoload_setting = eh_Utilities.SETTING_AUTOLOADS_BASE.path_join(data[0])
 		if ProjectSettings.has_setting(autoload_setting):
 			ProjectSettings.set_setting(autoload_setting, null)
 			has_changed = true
@@ -230,7 +209,7 @@ func _add_autoloads() -> void:
 	for autoload_data in PATH_AUTOLOADS:
 		var autoload_name = autoload_data[0]
 		if not ProjectSettings.has_setting("autoload/%s"%[autoload_name]):
-			var path = PATH_AUTOLOADS_FOLDER.path_join(autoload_data[1])
+			var path = eh_Utilities.PATH_AUTOLOADS_FOLDER.path_join(autoload_data[1])
 			add_autoload_singleton(autoload_name, path)
 
 
@@ -238,8 +217,11 @@ func _remove_autoloads() -> void:
 	for autoload_data in PATH_AUTOLOADS:
 		var autoload_name = autoload_data[0]
 		if ProjectSettings.has_setting("autoload/%s"%[autoload_name]):
-			var original_path := PATH_AUTOLOADS_FOLDER.path_join(autoload_data[1]) as String
-			var current_path := ProjectSettings.get_setting("autoload/%s"%[autoload_name]) as String
+			var original_path := \
+					eh_Utilities.PATH_AUTOLOADS_FOLDER.path_join(autoload_data[1]) as String
+			var current_path := \
+					ProjectSettings.get_setting("autoload/%s"%[autoload_name]) as String
+			
 			if "*%s"%[original_path] == current_path:
 				remove_autoload_singleton(autoload_name)
 
@@ -247,7 +229,7 @@ func _remove_autoloads() -> void:
 func _update_autoloads() -> void:
 	for autoload_data in PATH_AUTOLOADS:
 		var autoload_name := autoload_data[0] as String
-		var settings_name := SETTING_AUTOLOADS_BASE.path_join(autoload_name)
+		var settings_name := eh_Utilities.SETTING_AUTOLOADS_BASE.path_join(autoload_name)
 		var settings_path := ProjectSettings.get_setting(settings_name, "") as String
 		
 		var autoload_enabled := "%s_enabled"%[settings_name]
@@ -255,7 +237,7 @@ func _update_autoloads() -> void:
 			remove_autoload_singleton(autoload_name)
 			ProjectSettings.set_setting(settings_name, null)
 		elif _is_enabled_but_has_no_autoload(autoload_enabled, autoload_name):
-			settings_path = PATH_AUTOLOADS_FOLDER.path_join(autoload_data[1])
+			settings_path = eh_Utilities.PATH_AUTOLOADS_FOLDER.path_join(autoload_data[1])
 			add_autoload_singleton(autoload_name, settings_path)
 			ProjectSettings.set_setting(settings_name, settings_path)
 		

@@ -46,7 +46,6 @@ func _enter_tree() -> void:
 
 func _ready() -> void:
 	eh_EditorHelpers.connect_between(project_settings_changed, _on_project_settings_changed)
-	eh_EditorHelpers.connect_between(resource_saved, _on_resource_saved)
 
 
 func _exit_tree() -> void:
@@ -73,11 +72,6 @@ func _disable_plugin() -> void:
 
 
 ### Private Methods -------------------------------------------------------------------------------
-
-func _on_resource_saved(resource: Resource) -> void:
-	print("%s | path: %s"%[resource, resource.resource_path])
-	pass
-
 
 ####### Custom Inspectors -------------------------------------------------------------------------
 

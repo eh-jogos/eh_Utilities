@@ -243,13 +243,13 @@ func _update_autoloads() -> void:
 
 
 func _is_disabled_but_has_autoload(enabled_setting: String, autoload_name: String) -> bool:
-	var enabled := ProjectSettings.get_setting(enabled_setting, true)
+	var enabled := ProjectSettings.get_setting(enabled_setting, true) as bool
 	var has_autoload := ProjectSettings.has_setting("autoload/%s"%[autoload_name])
 	return not enabled and has_autoload
 
 
 func _is_enabled_but_has_no_autoload(enabled_setting: String, autoload_name: String) -> bool:
-	var enabled := ProjectSettings.get_setting(enabled_setting, true)
+	var enabled := ProjectSettings.get_setting(enabled_setting, true) as bool
 	var has_autoload := ProjectSettings.has_setting("autoload/%s"%[autoload_name])
 	return enabled and not has_autoload
 
@@ -265,8 +265,8 @@ func _copy_script_templates_to_project() -> void:
 
 func _copy_all_files(from: String, to: String) -> void:
 	var dir := DirAccess.open(from)
-	if dir.get_open_error() != OK:
-		push_error("Could not open path. Error: %s Path: %s"%[dir.get_open_error(), from])
+	if DirAccess.get_open_error() != OK:
+		push_error("Could not open path. Error: %s Path: %s"%[DirAccess.get_open_error(), from])
 		return
 	
 	dir.include_hidden = true

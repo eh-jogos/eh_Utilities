@@ -77,10 +77,8 @@ static func get_direction_snapped_to_four(direction: Vector2) -> Vector2:
 		return direction
 	
 	const ATAN_DOWN_RIGHT = atan2(1, 1) # PI * 0.25
-	const ATAN_DOWN = atan2(1, 0) # PI/2
 	const ATAN_DOWN_LEFT = atan2(1, -1) # PI * 0.75
 	const ATAN_UP_LEFT = atan2(-1, -1) # - PI * 0.75
-	const ATAN_UP = atan2(-1, 0) # - PI/2
 	const ATAN_UP_RIGHT = atan2(-1, 1) # - PI * 0.25
 	
 	var value := direction

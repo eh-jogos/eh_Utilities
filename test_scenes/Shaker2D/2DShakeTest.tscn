@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://addons/eh_jogos.utilities/custom_nodes/2d/eh_Shaker2D.gd" id="3"]
 [ext_resource type="Texture2D" uid="uid://b6k24asw0wa2k" path="res://icon.svg" id="3_rvjjd"]
-[ext_resource type="PackedScene" path="res://addons/eh_jogos.utilities/test_scenes/Shaker2D/TraumaDebugControls.tscn" id="5"]
+[ext_resource type="PackedScene" uid="uid://bbr5s34getyn" path="res://addons/eh_jogos.utilities/test_scenes/Shaker2D/TraumaDebugControls.tscn" id="5"]
 
 [sub_resource type="FastNoiseLite" id="4"]
 seed = 225015277

@@ -100,7 +100,8 @@ func _clear_old_logs() -> void:
 			files = dir.get_files()
 			
 			if files.size() > max_logs:
-				for index in range(files.size()-max_logs+1):
+				var amount_to_delete := files.size() - max_logs + 1
+				for index in range(amount_to_delete):
 					var file_path := files[index]
 					dir.remove(file_path)
 		else:

@@ -1,7 +1,7 @@
-[gd_scene load_steps=3 format=2]
+[gd_scene load_steps=3 format=3 uid="uid://bbr5s34getyn"]
 
-[ext_resource path="res://addons/eh_jogos.utilities/test_scenes/Shaker2D/DebugControls.gd" type="Script" id=1]
-[ext_resource path="res://addons/eh_jogos.utilities/test_scenes/Shaker2D/TimeScale.gd" type="Script" id=2]
+[ext_resource type="Script" path="res://addons/eh_jogos.utilities/test_scenes/Shaker2D/DebugControls.gd" id="1"]
+[ext_resource type="Script" path="res://addons/eh_jogos.utilities/test_scenes/Shaker2D/TimeScale.gd" id="2"]
 
 [node name="TraumaDebugControls" type="VBoxContainer"]
 anchor_right = 1.0
@@ -9,7 +9,7 @@ offset_left = 386.0
 offset_top = 13.0
 offset_right = -24.0
 offset_bottom = 71.0
-script = ExtResource( 1 )
+script = ExtResource("1")
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -22,9 +22,9 @@ offset_bottom = 16.0
 offset_top = 1.0
 offset_right = 250.0
 offset_bottom = 15.0
-minimum_size = Vector2( 250, 0 )
+minimum_size = Vector2(250, 0)
 text = "time scale: 0.00 "
-script = ExtResource( 2 )
+script = ExtResource("2")
 
 [node name="TimeScaleSlider" type="HSlider" parent="TimeScaleLine"]
 offset_left = 254.0

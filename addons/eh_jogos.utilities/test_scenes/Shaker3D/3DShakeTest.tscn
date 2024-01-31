@@ -1,7 +1,7 @@
 [gd_scene load_steps=12 format=3 uid="uid://b8qu7kfwh0gwv"]
 
 [ext_resource type="Script" path="res://addons/eh_jogos.utilities/custom_nodes/3d/eh_Shaker3D.gd" id="2"]
-[ext_resource type="PackedScene" path="res://addons/eh_jogos.utilities/test_scenes/Shaker2D/TraumaDebugControls.tscn" id="3"]
+[ext_resource type="PackedScene" uid="uid://bbr5s34getyn" path="res://addons/eh_jogos.utilities/test_scenes/Shaker2D/TraumaDebugControls.tscn" id="3"]
 
 [sub_resource type="PlaneMesh" id="1"]
 size = Vector2(50, 50)

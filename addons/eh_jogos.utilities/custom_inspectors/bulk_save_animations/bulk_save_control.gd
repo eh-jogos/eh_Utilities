@@ -131,6 +131,11 @@ func _get_export_dir_dialog() -> EditorFileDialog:
 	new_dialog.display_mode = EditorFileDialog.DISPLAY_LIST
 	new_dialog.name = "AnimationExportFolderDialog"
 	new_dialog.min_size = DIALOG_MIN_SIZE
+	if animation_player.scene_file_path.is_empty():
+		if not animation_player.owner.scene_file_path.is_empty():
+			new_dialog.current_path = animation_player.owner.scene_file_path
+	else:
+		new_dialog.current_dir = animation_player.scene_file_path
 	
 	return new_dialog
 

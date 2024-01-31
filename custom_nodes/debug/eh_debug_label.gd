@@ -45,7 +45,7 @@ func _ready() -> void:
 		return
 	
 	if max_width == 0:
-		max_width = get_viewport_rect().size.x
+		max_width = int(get_viewport_rect().size.x)
 	
 	if not is_visible_in_tree():
 		set_physics_process(false)
